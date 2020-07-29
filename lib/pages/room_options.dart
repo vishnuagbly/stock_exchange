@@ -52,6 +52,7 @@ class RoomOptions extends StatelessWidget {
                         roomCreator = true;
                         Navigator.pushNamed(context, "/enter_players");
                       },
+                      width: screenWidth * 0.2,
                     ),
                     SizedBox(
                       width: 20,
@@ -68,6 +69,7 @@ class RoomOptions extends StatelessWidget {
                           Navigator.pushNamed(context, "/join_room");
                         }
                       },
+                      width: screenWidth * 0.2,
                     )
                   ],
                 ),

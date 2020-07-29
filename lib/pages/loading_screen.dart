@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+///Special Accessory function for showing loading before a page.
+///
+///In [T] section enter type of data future function returns.
 class LoadingScreen<T> extends StatelessWidget {
   LoadingScreen({
     @required this.future,
@@ -7,10 +10,13 @@ class LoadingScreen<T> extends StatelessWidget {
     this.errFunc,
   }) : assert(future != null && func != null);
 
+  ///Future that will be used to get value or perform async operation needed
+  ///before loading next page.
   final Future<T> future;
   final Widget Function(Object error) errFunc;
 
-  ///this function should return
+  ///This function will execute after future is complete.
+  ///Also this function should return a Widget.
   final Widget Function(T res) func;
 
   @override
@@ -18,7 +24,8 @@ class LoadingScreen<T> extends StatelessWidget {
     return FutureBuilder(
       future: future,
       builder: (context, snapshot) {
-        if (snapshot.hasData) return func(snapshot.data);
+        if (snapshot.hasData)
+          return func(snapshot.data);
         else if (snapshot.connectionState == ConnectionState.done)
           return func(snapshot.data);
         if (snapshot.hasError)

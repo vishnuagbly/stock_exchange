@@ -68,6 +68,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                     SelectionButton(
                       "ONLINE",
                       onPressedOnline,
+                      width: screenWidth * 0.2,
                     ),
                     SizedBox(
                       width: 20,
@@ -78,6 +79,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                         online = false;
                         Navigator.of(context).pushNamed("/enter_players");
                       },
+                      width: screenWidth * 0.2,
                     )
                   ],
                 ),
