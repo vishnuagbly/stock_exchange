@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
-class LoadingScreen extends StatelessWidget {
-  LoadingScreen(this.future, this.func, {this.errFunc});
+class LoadingScreen<T> extends StatelessWidget {
+  LoadingScreen({
+    @required this.future,
+    @required this.func,
+    this.errFunc,
+  }) : assert(future != null && func != null);
 
-  final Future future;
-  final Widget Function() errFunc;
-  final Widget Function(dynamic) func;
+  final Future<T> future;
+  final Widget Function(Object error) errFunc;
+
+  ///this function should return
+  final Widget Function(T res) func;
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +19,11 @@ class LoadingScreen extends StatelessWidget {
       future: future,
       builder: (context, snapshot) {
         if (snapshot.hasData) return func(snapshot.data);
+        else if (snapshot.connectionState == ConnectionState.done)
+          return func(snapshot.data);
         if (snapshot.hasError)
           return errFunc != null
-              ? errFunc()
+              ? errFunc(snapshot.error)
               : Scaffold(
                   body: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

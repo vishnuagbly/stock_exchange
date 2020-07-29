@@ -79,11 +79,10 @@ class Network {
   }
 
   static Future<void> createRoom() async {
-    print("entered createRoom()");
-    print("calling to create room name");
+    log("calling to create room name", name: 'createRoom');
     await createRoomName();
-    print("room created");
-    print("total players: ${playerManager.totalPlayers}");
+    log("room created", name: 'createRoom');
+    log("total players: ${playerManager.totalPlayers}", name: 'createRoom');
     createDocument(
         roomDataDocumentName,
         RoomData(
@@ -100,9 +99,7 @@ class Network {
         playerManager.mainPlayer().toFullDataMap());
     resetPlayerTurns();
     setTimestamp();
-    print("<-----------------CreatedOnline Room------------------>");
-    print("${FieldValue.serverTimestamp().toString()}");
-    print("Room Name: $roomName");
+    log('room created', name: 'createRoom');
   }
 
   static void resetPlayerTurns() {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stockexchange/components/components.dart';
 import 'package:stockexchange/network/network.dart';
 import 'package:stockexchange/global.dart';
+import 'package:stockexchange/pages/all_pages.dart';
 
 class EnterTotalPlayers extends StatelessWidget {
   @override
@@ -61,9 +62,15 @@ class EnterTotalPlayers extends StatelessWidget {
                   else {
                     specs.showInfo(["You are now online"]);
                     print("uuid: $authId");
-
-                    await Network.createRoom();
-                    Navigator.pushNamed(context, "/online_room");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LoadingScreen<void>(
+                          future: Network.createRoom(),
+                          func: (_) => OnlineRoom(),
+                        ),
+                      ),
+                    );
                   }
                 }
               }
