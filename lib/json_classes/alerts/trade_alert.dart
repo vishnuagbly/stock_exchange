@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:stockexchange/backend_files/backend_files.dart';
 import 'package:stockexchange/components/common_alert_dialog.dart';
+import 'package:stockexchange/network/transactions.dart';
 import 'trade_accepted.dart';
 import 'trade_declined.dart';
 import 'package:stockexchange/network/network.dart';
-import 'package:stockexchange/backend_files/player.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/components/main_alert_dialog.dart';
 import 'alert.dart';
@@ -26,6 +29,7 @@ class TradeAlert extends Alert {
 
   @override
   AlertDialog alertDialog(BuildContext context) {
+    log('trying to make alert dialog', name: 'tradeAlertDialog');
     if (tradeDetails == null) return null;
     Player mainPlayer = playerManager.mainPlayer();
     if (tradeDetails.moneyRequested > mainPlayer.money)
@@ -82,11 +86,9 @@ class TradeAlert extends Alert {
             ),
           ),
           onPressed: () async {
-            Future complete = playerManager.onlineTrade(tradeDetails);
-            await Network.updateAllMainPlayerData();
+            Future complete = Transaction.makeTrade(tradeDetails);
             TradeAccepted tradeAccepted = TradeAccepted(tradeDetails);
-            Network.createDocument(
-                "$alertDocumentName/$uuid/${Network.authId}",
+            Network.createDocument("$alertDocumentName/$uuid/${Network.authId}",
                 tradeAccepted.toMap());
             Navigator.of(context).pop();
             showDialog(
@@ -96,7 +98,9 @@ class TradeAlert extends Alert {
                 return FutureBuilder(
                   future: complete,
                   builder: (context, snapshot) {
-                    if (snapshot.hasData) {
+                    if (snapshot.hasData ||
+                        (snapshot.connectionState == ConnectionState.done &&
+                            !snapshot.hasError)) {
                       return CommonAlertDialog("Trade Successful");
                     } else if (snapshot.hasError) {
                       return CommonAlertDialog(

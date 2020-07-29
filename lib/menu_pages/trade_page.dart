@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:stockexchange/backend_files/backend_files.dart';
+import 'package:stockexchange/components/dialogs/future_dialog.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/components/input_board.dart';
-import 'package:stockexchange/backend_files/player.dart';
 import 'package:stockexchange/components/common_alert_dialog.dart';
 
 class TradePage extends StatelessWidget {
@@ -66,8 +67,7 @@ class TradePage extends StatelessWidget {
             specs.inputTextControllers[3].text = money.toString();
             specs.showError(
                 ["", "", "", "this is the maximum money person can offer"]);
-          }
-          else if(money < 0){
+          } else if (money < 0) {
             money = 0;
             specs.inputTextControllers[3].text = money.toString();
             specs.showError(["", "", "", "money should be greater than 0"]);
@@ -81,17 +81,29 @@ class TradePage extends StatelessWidget {
         bool allFieldsEmpty =
             await specs.checkAndTakeActionIfAllFieldsAreEmpty(context);
         if (!allFieldsEmpty) {
-          bool tradeSuccessFull = await makeTrade(specs, tradeDetails(specs));
-          if (tradeSuccessFull != null && tradeSuccessFull) {
-            print("Trade Successful");
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => FutureDialog<bool>(
+              future: makeTrade(specs, tradeDetails(specs)),
+              loadingText: 'Trading...',
+              hasData: (res) {
+                if (res == null)
+                  return CommonAlertDialog('Trade Request Sent');
+                else if (res)
+                  return CommonAlertDialog('Trade Successful');
+                else {
                   return CommonAlertDialog(
-                    "Trade Successful",
+                    'Trade Unsuccessful',
+                    icon: Icon(
+                      Icons.block,
+                      color: Colors.red,
+                    ),
                   );
-                });
-          }
+                }
+              },
+            ),
+          );
         }
       },
     );
@@ -106,9 +118,8 @@ class TradePage extends StatelessWidget {
       specs.showError(errorText);
     }
     List<int> inputValues = specs.getAllTextFieldIntValues();
-    for(int i = 0; i < inputValues.length; i++)
-      if(inputValues[i] == null)
-        inputValues[i] = 0;
+    for (int i = 0; i < inputValues.length; i++)
+      if (inputValues[i] == null) inputValues[i] = 0;
     return TradeDetails(inputValues, playerManager.getPlayerIndex(playerName),
         playerManager.mainPlayerIndex);
   }
@@ -125,6 +136,7 @@ class TradePage extends StatelessWidget {
       specs.errorText.length = specs.inputTextControllers.length;
       specs.showError(specs.errorText);
       tradeSuccessFull = false;
+      throw error;
     }
     return tradeSuccessFull;
   }

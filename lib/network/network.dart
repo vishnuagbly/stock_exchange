@@ -25,10 +25,15 @@ class Network {
   static String roomName = "null";
 
   static DocumentReference get mainPlayerFullDataDocRef =>
-      firestore.document('$roomName/$playerFullDataCollectionPath/$authId');
+      playerFullDataRef(authId);
 
-  static DocumentReference get mainPlayerDataDocRef =>
-      firestore.document('$roomName/$playerDataCollectionPath/$authId');
+  static DocumentReference playerFullDataRef(String uuid) =>
+      firestore.document('$roomName/$playerFullDataCollectionPath/$uuid');
+
+  static DocumentReference get mainPlayerDataDocRef => playerDataDocRef(authId);
+
+  static DocumentReference playerDataDocRef(String uuid) =>
+      firestore.document('$roomName/$playerDataCollectionPath/$uuid');
 
   static DocumentReference get roomDataDocRef =>
       firestore.document('$roomName/$roomDataDocumentName');
@@ -135,6 +140,11 @@ class Network {
       throw "Room is Full";
     }
     return Future.value(true);
+  }
+
+  static Future<void> getAndSetMainPlayerFullData() async {
+    var mainPlayerData = await getData("$playerFullDataCollectionPath/$authId");
+    playerManager.setOfflineMainPlayerData(Player.fromFullMap(mainPlayerData));
   }
 
   static Future<void> uploadMainPlayerAllData() async {
@@ -274,17 +284,20 @@ class Network {
       );
 
   static Future<bool> createDocument(
-      String documentName, Map<String, dynamic> data) {
+      String documentName, Map<String, dynamic> data) async {
     try {
-      print("trying to create document: $documentName");
+      log(
+        'trying to create document: $documentName data: ${data.toString()}',
+        name: "createDocument",
+      );
       if (documentName != null)
-        firestore.document("$gameDataPath/$documentName").setData(data);
+        await firestore.document("$gameDataPath/$documentName").setData(data);
       else
-        firestore.collection(gameDataPath).add(data);
+        await firestore.collection(gameDataPath).add(data);;
       return Future.value(true);
     } catch (error) {
       print(error);
-      return Future.value(false);
+      throw error;
     }
   }
 

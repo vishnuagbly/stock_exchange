@@ -4,47 +4,9 @@ import 'package:stockexchange/global.dart';
 import 'package:stockexchange/json_classes/alerts/all_alerts.dart';
 import 'package:stockexchange/network/network.dart';
 import 'package:stockexchange/backend_files/card_data.dart' as shareCard;
+import 'trade.dart';
 import 'package:stockexchange/charts/pie_chart.dart';
 import 'package:stockexchange/charts/bar_chart.dart';
-
-class TradeDetails {
-  final cardsOffered;
-  final moneyOffered;
-  final cardsRequested;
-  final moneyRequested;
-  final int playerRequesting;
-  final int playerRequested;
-
-  TradeDetails(List<int> values, this.playerRequested, this.playerRequesting)
-      : this.cardsOffered = values[0],
-        this.moneyOffered = values[1],
-        this.cardsRequested = values[2],
-        this.moneyRequested = values[3];
-
-  TradeDetails.fromMap(Map<String, dynamic> map)
-      : this.cardsOffered = map["values"][0],
-        this.moneyOffered = map["values"][1],
-        this.cardsRequested = map["values"][2],
-        this.moneyRequested = map["values"][3],
-        this.playerRequested = map["playerRequested"],
-        this.playerRequesting = map["playerRequesting"];
-
-  Map<String, dynamic> toMap() => {
-        "values": [cardsOffered, moneyOffered, cardsRequested, moneyRequested],
-        "playerRequested": playerRequested,
-        "playerRequesting": playerRequesting,
-      };
-
-  TradeDetails reverse() {
-    List<int> values = [
-      cardsRequested,
-      moneyRequested,
-      cardsOffered,
-      moneyOffered
-    ];
-    return TradeDetails(values, playerRequesting, playerRequested);
-  }
-}
 
 class Player {
   String name;
@@ -334,9 +296,7 @@ class Player {
     this.shares[companyIndex] += shares;
   }
 
-
-
-  ///Returns if trade accepted or not
+  ///Returns true if trade accepted.
   bool tradeRequest(TradeDetails tradeDetails) {
     if (!mainPlayer) {
       if (tradeDetails.cardsRequested == tradeDetails.cardsOffered) return true;
@@ -355,6 +315,38 @@ class Player {
         return false;
     } else
       return false;
+  }
+
+  ///Performs trade considering the other player as requesting trade.
+  ///
+  ///Trade is only performed one sided.
+  void makeHalfTrade(TradeDetails tradeDetails, Player player) {
+    log('making half trade', name: 'Player.halfTrade');
+    log('checking if trade possible', name: 'Player.halfTrade');
+    tradeDetails.checkIfTradePossible(this, player);
+    log('trade possible', name: 'Player.halfTrade');
+    _money += tradeDetails.moneyOffered - tradeDetails.moneyRequested;
+    if (mainPlayer) balance.value = money;
+    int offeringPlayer = tradeDetails.playerRequesting;
+    int thisIndex = tradeDetails.playerRequested;
+    int alreadyTradedCards = totalTradedCards[offeringPlayer];
+    log("total cards already traded: ${totalTradedCards[offeringPlayer]}",
+        name: 'Player.halfTrade');
+    int numOfCards = getPossibleTradingCards(
+      cardsProvider: player,
+      cardsAcceptor: this,
+      numOfCards: tradeDetails.cardsOffered,
+      providerIndex: offeringPlayer,
+      acceptorIndex: thisIndex,
+    );
+    for (int i = alreadyTradedCards; i < numOfCards + alreadyTradedCards; i++) {
+      log("i: $i", name: 'Player.halfTrade');
+      if (player.getAllCards()[i].tradedFrom != thisIndex)
+        addCards([player.getAllCards()[i]],
+            traded: true, tradedFrom: offeringPlayer);
+      else
+        i--;
+    }
   }
 }
 
@@ -419,9 +411,7 @@ class PlayerManager {
     }
   }
 
-  void generatePlayers(
-    List<String> playerNames,
-  ) {
+  void generatePlayers(List<String> playerNames) {
     if (playerNames.length != totalPlayers) {
       print("Error: playerNames String is not equal to totalPLayers");
       int i = 1;
@@ -456,7 +446,7 @@ class PlayerManager {
   void setAllPlayersValues(List<List<shareCard.Card>> playerCards,
       List<List<shareCard.Card>> processedPlayerCards) {
     for (int i = 0; i < _allPlayers.length; i++) {
-      setPlayerValues(playerCards[i], i);
+      setPlayerAllCards(playerCards[i], i);
       _allPlayers[i].setCardPrice();
       for (int j = 0; j < _allPlayers[i].totalTradedCards.length; j++)
         _allPlayers[i].totalTradedCards[j] = 0;
@@ -464,10 +454,11 @@ class PlayerManager {
     }
   }
 
-  void setPlayerValues(List<shareCard.Card> cards, int playerIndex) {
+  void setPlayerAllCards(List<shareCard.Card> cards, int playerIndex) {
     _allPlayers[playerIndex].setAllCards(cards);
   }
 
+  ///returns -1 in case of name doesn't exist.
   int getPlayerIndex(String playerName) {
     for (int i = 0; i < _allPlayers.length; i++)
       if (_allPlayers[i].name == playerName) return i;
@@ -491,34 +482,32 @@ class PlayerManager {
   ///Here this is the different function to set valueNotifier as in case of
   ///multiplayer there might not be need of calling generatePLayers
   bool tradeProcessOffline(TradeDetails tradeDetails) {
-    int tradeRequesterPlayerIndex = tradeDetails.playerRequesting;
-    int tradeRequestedPlayerIndex = tradeDetails.playerRequested;
-    if (tradeRequesterPlayerIndex < 0 ||
-        tradeRequesterPlayerIndex >= _allPlayers.length) {
+    int requestingPlayerIndex = tradeDetails.playerRequesting;
+    int requestedPlayerIndex = tradeDetails.playerRequested;
+    if (requestingPlayerIndex < 0 ||
+        requestingPlayerIndex >= _allPlayers.length) {
       throw "Error: trade requseter doesn't exist, trade doesn't performed";
     }
-    if (tradeRequestedPlayerIndex < 0 ||
-        tradeRequestedPlayerIndex >= _allPlayers.length) {
+    if (requestedPlayerIndex < 0 ||
+        requestedPlayerIndex >= _allPlayers.length) {
       throw "Error: trade requseted player doesn't exist, trade doesn't performed";
     }
-    if (_allPlayers[tradeRequesterPlayerIndex].money <
-        tradeDetails.moneyOffered) {
+    if (_allPlayers[requestingPlayerIndex].money < tradeDetails.moneyOffered) {
       throw "Error: money offered more than you have, trade does not performed";
     }
-    if (_allPlayers[tradeRequestedPlayerIndex].money <
-        tradeDetails.moneyRequested) {
+    if (_allPlayers[requestedPlayerIndex].money < tradeDetails.moneyRequested) {
       throw "Error: money Requested more than player can offer, trade does not performed";
     }
-    if (_allPlayers[tradeRequestedPlayerIndex].tradeRequest(tradeDetails)) {
-      _allPlayers[tradeRequestedPlayerIndex]
-          .addMoney(tradeDetails.moneyOffered - tradeDetails.moneyRequested);
-      _allPlayers[tradeRequesterPlayerIndex]
-          .addMoney(tradeDetails.moneyRequested - tradeDetails.moneyOffered);
+    if (_allPlayers[requestedPlayerIndex].tradeRequest(tradeDetails)) {
       try {
-        tradeCards(tradeRequesterPlayerIndex, tradeRequestedPlayerIndex,
-            tradeDetails.cardsRequested);
-        tradeCards(tradeRequestedPlayerIndex, tradeRequesterPlayerIndex,
-            tradeDetails.cardsOffered);
+        _allPlayers[requestingPlayerIndex].makeHalfTrade(
+          tradeDetails.detailsForRequestingPlayer,
+          _allPlayers[requestedPlayerIndex],
+        );
+        _allPlayers[requestedPlayerIndex].makeHalfTrade(
+          tradeDetails.detailsForRequestedPlayer,
+          _allPlayers[requestingPlayerIndex],
+        );
       } catch (e) {
         throw e;
       }
@@ -528,78 +517,48 @@ class PlayerManager {
   }
 
   Future<void> tradeProcessOnline(TradeDetails tradeDetails) async {
+    await checkOnlineTradeIfPossible(tradeDetails);
     await Network.createDocument(
-        "$alertDocumentName/${_allPlayers[tradeDetails.playerRequested].uuid}/${Network.authId}",
-        TradeAlert(tradeDetails).toMap());
+            "$alertDocumentName/${_allPlayers[tradeDetails.playerRequested].uuid}/${Network.authId}",
+            TradeAlert(tradeDetails).toMap())
+        .catchError((err) => throw err);
   }
 
-  void tradeCards(int toPlayer, int fromPlayer, int numOfCards) {
-    if (toPlayer < 0 || toPlayer >= _allPlayers.length) {
-      throw "Error: requesting player doesn't exist, trade doesn't performed";
-    }
-    if (fromPlayer < 0 || fromPlayer >= _allPlayers.length) {
-      throw "Error: requested player doesn't exist, trade doesn't performed";
-    }
-    int alreadyTradedCards = _allPlayers[toPlayer].totalTradedCards[fromPlayer];
-    numOfCards = checkNumOfTradingCards(fromPlayer, toPlayer, numOfCards);
-    print(
-        "total cards already traded: ${_allPlayers[toPlayer].totalTradedCards[fromPlayer]}");
-    for (int i = alreadyTradedCards; i < numOfCards + alreadyTradedCards; i++) {
-      print("i: $i");
-      if (_allPlayers[fromPlayer].getAllCards()[i].tradedFrom != toPlayer)
-        _allPlayers[toPlayer].addCards(
-            [_allPlayers[fromPlayer].getAllCards()[i]],
-            traded: true, tradedFrom: fromPlayer);
-      else
-        i--;
-    }
+  ///throws error if trade not possible
+  Future<void> checkOnlineTradeIfPossible(TradeDetails tradeDetails) async {
+    String requestedId = getPlayerId(index: tradeDetails.playerRequested);
+    var requestedMap =
+        await Network.getData('$playerDataCollectionPath/$requestedId');
+    Player requested = Player.fromMap(requestedMap, 2);
+    Player requester = mainPlayer();
+    tradeDetails.checkIfTradePossible(requester, requested);
   }
 
-  Future<bool> onlineTrade(TradeDetails tradeDetails) async {
-    int fromPlayerIndex = tradeDetails.playerRequesting;
-    _allPlayers[fromPlayerIndex].totalTradedCards[mainPlayerIndex] +=
-        tradeDetails.cardsRequested;
-    _allPlayers[fromPlayerIndex]
-        .addMoney(tradeDetails.moneyRequested - tradeDetails.moneyOffered);
-    _allPlayers[mainPlayerIndex]
-        .addMoney(tradeDetails.moneyOffered - tradeDetails.moneyRequested);
-    String fromPlayerUUID = _allPlayers[fromPlayerIndex].uuid;
-    Map<String, dynamic> fromPlayerFullMap = await Network.getData(
-        "$playerFullDataCollectionPath/$fromPlayerUUID");
-    Player fromPlayer = Player.fromFullMap(fromPlayerFullMap);
-    int alreadyTradedCards = mainPlayer().totalTradedCards[fromPlayerIndex];
-    int numOfCards = checkNumOfTradingCards(
-        fromPlayerIndex, mainPlayerIndex, tradeDetails.cardsOffered);
-    for (int i = alreadyTradedCards; i < numOfCards + alreadyTradedCards;) {
-      if (fromPlayer.getAllCards()[i].tradedFrom != mainPlayerIndex) {
-        _allPlayers[mainPlayerIndex].addCards([fromPlayer.getAllCards()[i]],
-            traded: true, tradedFrom: fromPlayerIndex);
-        i++;
-      }
-    }
-    log("trade performed", name: "onlineTrade");
-    return true;
+  ///provide either [index] of player or [name] of player. In case of both, index will
+  ///be given priority.
+  ///
+  ///It is required to provide at least one of them.
+  String getPlayerId({int index, String name}) {
+    assert(index != null || name != null);
+    if (index == null && name != null) index = getPlayerIndex(name);
+    if (index == -1 && name != null) throw 'name does not exist';
+    if (index >= 0 && index < totalPlayers)
+      return _allPlayers[index].uuid;
+    else
+      throw 'index out of range';
   }
 
   int checkNumOfTradingCards(int fromPlayer, int toPlayer, int numOfCards) {
     String logName = "checkNumOfTradingCards";
     log("to: $toPlayer, from: $fromPlayer, numOfCards: $numOfCards",
         name: logName);
-    int alreadyTradedCards = _allPlayers[toPlayer].totalTradedCards[fromPlayer];
-    if (numOfCards >
-            (_allPlayers[fromPlayer].getAllCardsLength() -
-                _allPlayers[toPlayer].totalTradedCards[fromPlayer] -
-                _allPlayers[fromPlayer].totalTradedCards[toPlayer]) ||
-        numOfCards < 0) {
-      print(
-          "Error: number of cards requested greater than player have or smaller than 0");
-      numOfCards = numOfCards < 0
-          ? 0
-          : _allPlayers[fromPlayer].getAllCardsLength() -
-              alreadyTradedCards -
-              _allPlayers[fromPlayer].totalTradedCards[toPlayer];
-    }
-    return numOfCards;
+    return getPossibleTradingCards(
+      cardsProvider: _allPlayers[fromPlayer],
+      cardsAcceptor: _allPlayers[toPlayer],
+      numOfCards: numOfCards,
+      providerIndex: fromPlayer,
+      acceptorIndex: toPlayer,
+    );
   }
 
   void otherPlayerTurns() {

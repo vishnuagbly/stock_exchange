@@ -3,7 +3,6 @@ library components;
 export 'app_bar_actions.dart';
 export 'app_bar_leading_arrow.dart';
 export 'buy_shares_button.dart';
-export 'buy_sell_shares_page_manager.dart';
 export 'card.dart';
 export 'common_alert_dialog.dart';
 export 'company_slates.dart';

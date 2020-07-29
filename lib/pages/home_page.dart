@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       screenWidth = screen.size.height;
       screenHeight = screen.size.width;
     }
-    if(runCheckAlert && Network.roomName != "null"){
+    if (runCheckAlert && Network.roomName != "null") {
       checkAndShowAlert(context);
       runCheckAlert = false;
     }
@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     fromCompanyPage = false;
                     return ValueListenableBuilder(
                       valueListenable: homeListChanged,
-                      builder: (context, value, _){
+                      builder: (context, value, _) {
                         return SliverList(
                           delegate: SliverChildListDelegate(
                             homeList(),
@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   else if (value == StockPage.totalAssets)
                     return TotalAssetsMenuPage();
                   else if (value == StockPage.start)
-                    return StartingPage();
+                    return StartingPage(this);
                   else
                     return NextRoundPage();
                 },
@@ -88,7 +88,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ),
     );
   }
-
 }
 
 List<Widget> homeList() {

@@ -23,12 +23,15 @@ enum StockPage {
   totalAssets,
 }
 
-enum roundLoadingStatus {
+enum LoadingStatus {
   calculationStarted,
   calculationInProgress,
   calculationCompleted,
   startingNextRound,
   startedNextRound,
+  trading,
+  tradingError,
+  tradeComplete,
 }
 
 String getPageTitle (StockPage page) {
@@ -133,7 +136,7 @@ final kRoomOptionsPageName = "/room_options";
 final kLoadingPageName = '/loading_page';
 
 final String roomDataDocumentName = "room_data";
-final String nextRoundStatusDocName = "round_loading_status";
+final String loadingStatusDocName = "loading_status";
 final String alertDocumentName = "alert";
 
 final String playerDataDocumentName = "players_data";

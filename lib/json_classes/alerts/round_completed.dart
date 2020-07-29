@@ -32,13 +32,13 @@ class CompletingRound extends Alert {
       barrierDismissible: false,
       builder: (context){
         return StreamBuilder<DocumentSnapshot>(
-          stream: Network.getDocumentStream(nextRoundStatusDocName),
+          stream: Network.getDocumentStream(loadingStatusDocName),
           builder: (context, snapshot){
             String status = "Completing Round";
             if(snapshot.data != null && snapshot.data.data != null){
               Map<String, dynamic> statusMap = snapshot.data.data;
-              RoundLoadingStatus statusObj = RoundLoadingStatus.fromMap(statusMap);
-              if(statusObj.status == roundLoadingStatus.startedNextRound){
+              Status statusObj = Status.fromMap(statusMap);
+              if(statusObj.status == LoadingStatus.startedNextRound){
                 cardBank.generateAllCards();
                 startNextRound();
                 playerManager.incrementPlayerTurn();

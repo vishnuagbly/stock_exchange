@@ -3,6 +3,10 @@ import 'package:stockexchange/components/input_board.dart';
 import 'package:stockexchange/global.dart';
 
 class StartingPage extends StatelessWidget {
+  StartingPage(this.homePageState);
+
+  final State homePageState;
+
   @override
   Widget build(BuildContext context) {
     print("<--------------reached Start Page----------------->");
@@ -25,10 +29,11 @@ class StartingPage extends StatelessWidget {
         if (inputs[0].text == null || inputs[0].text == "") {
           specs.errorText[0] = "Name is important to write";
           specs.showError(specs.errorText);
-        }  else {
+        } else {
           tempPlayerName = inputs[0].text;
           await Navigator.pushNamed(context, '/connection_page');
-          ///Remember to check for player turn does not exceed total players
+          // ignore: invalid_use_of_protected_member
+          homePageState.setState(() {});
         }
       },
     );

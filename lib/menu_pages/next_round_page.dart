@@ -84,7 +84,7 @@ Future<void> startNextOnlineRound() async {
 
 void sendRoundCompleteAlert(List<Player> allPlayers) async {
   log("sending roundLoadingStatus", name: "setRoundCompleteAlert");
-  await RoundLoadingStatus.send(roundLoadingStatus.calculationStarted);
+  await Status.send(LoadingStatus.calculationStarted);
   log("creating completingRound object", name: "setRoundCompleteAlert");
   CompletingRound completingRound = CompletingRound();
   for (Player player in allPlayers) {
@@ -96,7 +96,7 @@ void sendRoundCompleteAlert(List<Player> allPlayers) async {
 }
 
 List<shareCard.Card> getAllCards(List<Player> allPlayers) {
-  RoundLoadingStatus.send(roundLoadingStatus.calculationInProgress);
+  Status.send(LoadingStatus.calculationInProgress);
   List<shareCard.Card> allCards = [];
   Player mainPlayer = playerManager.mainPlayer();
   for (shareCard.Card card in mainPlayer.getAllCards()) {
@@ -112,7 +112,7 @@ List<shareCard.Card> getAllCards(List<Player> allPlayers) {
 }
 
 Future<void> calcAndUploadSharePrices(List<shareCard.Card> allCards) async {
-  RoundLoadingStatus.send(roundLoadingStatus.calculationCompleted);
+  Status.send(LoadingStatus.calculationCompleted);
   List<int> shareValues = [];
   for (int i = 0; i < companies.length; i++) shareValues.add(0);
   for (shareCard.Card card in allCards)
@@ -120,6 +120,6 @@ Future<void> calcAndUploadSharePrices(List<shareCard.Card> allCards) async {
   for (int i = 0; i < companies.length; i++)
     companies[i].setCurrenSharePrice(shareValues[i]);
   await Network.updateCompaniesData();
-  RoundLoadingStatus.send(roundLoadingStatus.startedNextRound);
+  Status.send(LoadingStatus.startedNextRound);
   Network.resetPlayerTurns();
 }

@@ -1,64 +1,27 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:stockexchange/components/common_alert_dialog.dart';
 
 class FutureDialog<T> extends StatelessWidget {
   FutureDialog({
     @required this.future,
     this.loadingText = 'Loading',
-    Widget Function(
-      Widget Function(String text, Icon icon,
-              {Function onPressed, String buttonText})
-          dialog,
-    )
-        hasData,
-    Widget Function(
-      Widget Function(String text, Icon icon,
-              {Function onPressed, String buttonText})
-          dialog,
-    )
-        hasError,
+    Widget Function(T res) hasData,
+    Widget Function(Object error) hasError,
   })  : assert(future != null),
         hasData = hasData,
         hasError = hasError;
 
   final Future<T> future;
   final String loadingText;
-  final Widget Function(
-      Widget Function(String text, Icon icon,
-              {Function onPressed, String buttonText})
-          dialog) hasError;
-  final Widget Function(
-      Widget Function(String text, Icon icon,
-              {Function onPressed, String buttonText})
-          dialog) hasData;
+  final Widget Function(Object error) hasError;
+
+  ///executes when either future is done with no error or returns data.
+  final Widget Function(T res) hasData;
 
   @override
   Widget build(BuildContext context) {
-    Widget dialog(
-      String text,
-      Icon icon, {
-      Function onPressed,
-      String buttonText = 'OK',
-    }) {
-      return AlertDialog(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(text),
-            SizedBox(width: 20),
-            icon,
-          ],
-        ),
-        actions: [
-          FlatButton(
-            child: Text(buttonText),
-            onPressed: onPressed ?? () => Navigator.pop(context),
-          )
-        ],
-      );
-    }
-
     return FutureBuilder<T>(
       future: future,
       builder: (context, snapshot) {
@@ -66,25 +29,18 @@ class FutureDialog<T> extends StatelessWidget {
             (snapshot.connectionState == ConnectionState.done &&
                 !snapshot.hasError)) {
           if (hasData != null)
-            return hasData(dialog);
+            return hasData(snapshot.data);
           else
-            return dialog(
-              'DONE',
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 20,
-              ),
-            );
+            return CommonAlertDialog('DONE');
         }
         if (snapshot.hasError) {
           if (hasError != null)
-            return hasError(dialog);
+            return hasError(snapshot.error);
           else {
             log('err: ${snapshot.error.toString()}', name: 'FutureDialog');
-            return dialog(
+            return CommonAlertDialog(
               'SOME ERROR OCCURRED',
-              Icon(
+              icon: Icon(
                 Icons.block,
                 color: Colors.red,
                 size: 20,

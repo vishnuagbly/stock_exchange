@@ -1,14 +1,14 @@
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/network/network.dart';
 
-class RoundLoadingStatus {
-  RoundLoadingStatus(this.status);
+class Status {
+  Status(this.status);
 
-  RoundLoadingStatus.fromMap(Map<String, dynamic> map)
-      : status = roundLoadingStatus.values
+  Status.fromMap(Map<String, dynamic> map)
+      : status = LoadingStatus.values
             .firstWhere((test) => test.index == map["status"]);
 
-  roundLoadingStatus status;
+  LoadingStatus status;
 
   Map<String, dynamic> toMap() => {
         "status": status.index,
@@ -16,22 +16,30 @@ class RoundLoadingStatus {
 
   String toString() {
     switch (status) {
-      case roundLoadingStatus.calculationStarted:
+      case LoadingStatus.calculationStarted:
         return "Round Completed";
-      case roundLoadingStatus.calculationInProgress:
+      case LoadingStatus.calculationInProgress:
         return "Preparing Next Round";
-      case roundLoadingStatus.calculationCompleted:
+      case LoadingStatus.calculationCompleted:
         return "Loading Next Round";
-      case roundLoadingStatus.startingNextRound:
+      case LoadingStatus.startingNextRound:
         return "Starting Next Round";
+      case LoadingStatus.trading:
+        return "Trading";
+      case LoadingStatus.tradingError:
+        return 'Some error while trading occured';
+      case LoadingStatus.tradeComplete:
+        return 'Trade Successful';
       default:
         return "Loading";
     }
   }
 
-  static Future<void> send(roundLoadingStatus statusEnum) async {
-    RoundLoadingStatus status = RoundLoadingStatus(statusEnum);
+  Future<void> sendStatus() async => await send(status);
+
+  static Future<void> send(LoadingStatus statusEnum) async {
+    Status status = Status(statusEnum);
     await Network.createDocument(
-        nextRoundStatusDocName, status.toMap());
+        loadingStatusDocName, status.toMap());
   }
 }
