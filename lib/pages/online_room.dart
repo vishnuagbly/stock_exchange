@@ -28,6 +28,8 @@ class OnlineRoom extends StatelessWidget {
                         "${Network.gameDataPath}/${Network.roomDataDocumentName}")
                     .snapshots(),
                 builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting)
+                    return CircularProgressIndicator();
                   if (!snapshot.hasData) {
                     return RoomDoesNotExist();
                   }
