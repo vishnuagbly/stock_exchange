@@ -38,6 +38,10 @@ class ShareMarket {
           specs.showError(["", "there not enough shares left"]);
           return;
         }
+        if (shares <= 0){
+          specs.showError(["cannot buy zero shares", ""]);
+          return;
+        }
         if (online) {
           int price = (shares * selectedCompany.getCurrentSharePrice()).toInt();
           specs.inputTextControllers[1].text = price.toString();
@@ -100,6 +104,10 @@ class ShareMarket {
         int shares = specs.getAllTextFieldIntValues()[0];
         Player mainPlayer = playerManager.mainPlayer();
         specs.checkAndTakeActionIfCompanyIsBankrupt(context);
+        if(shares <= 0){
+          specs.showError(['cannor sell zeo shares', '']);
+          return;
+        }
         if (shares <= mainPlayer.shares[companies.indexOf(selectedCompany)]) {
           if (online) {
             int price =
