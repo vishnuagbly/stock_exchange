@@ -82,7 +82,7 @@ double screenHeight, screenWidth;
 
 ///Streams
 final playerTurnStream = Network.firestore
-    .document("${Network.roomName}/${Network.playersTurnDocumentName}")
+    .document("${Network.roomName}/$playersTurnDocumentName")
     .snapshots();
 
 final playerTurnSubscription = playerTurnStream.listen((playerTurnDocument) {
@@ -131,6 +131,26 @@ final kLoginPageName =  "/login_page";
 final kEnterPlayersPageName = "/enter_players";
 final kRoomOptionsPageName = "/room_options";
 final kLoadingPageName = '/loading_page';
+
+final String roomDataDocumentName = "room_data";
+final String nextRoundStatusDocName = "round_loading_status";
+final String alertDocumentName = "alert";
+
+final String playerDataDocumentName = "players_data";
+
+String get playerDataCollectionPath =>
+    "$roomDataDocumentName/$playerDataDocumentName";
+
+final String companiesDataDocumentName = "companies_data";
+
+String get companiesDataDocumentPath => companiesDataDocumentName;
+
+final String playersFullDataDocumentName = "Players_full_data";
+
+String get playerFullDataCollectionPath =>
+    "$roomDataDocumentName/$playersFullDataDocumentName";
+
+final String playersTurnDocumentName = "players_turn";
 
 ///Alert Dialog Constants
 const kAlertDialogBackgroundColorCode = 0xFF202020;

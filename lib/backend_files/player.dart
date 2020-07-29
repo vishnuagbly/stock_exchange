@@ -333,8 +333,9 @@ class Player {
     if (mainPlayer) balance.value = _money;
     companies[companyIndex].leftShares -= shares;
     this.shares[companyIndex] += shares;
-    Network.updateCompaniesData();
   }
+
+
 
   ///Returns if trade accepted or not
   bool tradeRequest(TradeDetails tradeDetails) {
@@ -529,7 +530,7 @@ class PlayerManager {
 
   Future<void> tradeProcessOnline(TradeDetails tradeDetails) async {
     await Network.createDocument(
-        "${Network.alertDocumentName}/${_allPlayers[tradeDetails.playerRequested].uuid}/${Network.authId}",
+        "$alertDocumentName/${_allPlayers[tradeDetails.playerRequested].uuid}/${Network.authId}",
         TradeAlert(tradeDetails).toMap());
   }
 
@@ -565,7 +566,7 @@ class PlayerManager {
         .addMoney(tradeDetails.moneyOffered - tradeDetails.moneyRequested);
     String fromPlayerUUID = _allPlayers[fromPlayerIndex].uuid;
     Map<String, dynamic> fromPlayerFullMap = await Network.getData(
-        "${Network.playerFullDataCollectionPath}/$fromPlayerUUID");
+        "$playerFullDataCollectionPath/$fromPlayerUUID");
     Player fromPlayer = Player.fromFullMap(fromPlayerFullMap);
     int alreadyTradedCards = mainPlayer().totalTradedCards[fromPlayerIndex];
     int numOfCards = checkNumOfTradingCards(
@@ -617,6 +618,11 @@ class PlayerManager {
     _allPlayers[_mainPlayerIndex] = mainPlayer;
     balance.value = mainPlayer.money;
     Network.updateAllMainPlayerData();
+  }
+
+  void setOfflineMainPlayerData(Player mainPlayer) {
+    _allPlayers[_mainPlayerIndex] = mainPlayer;
+    balance.value = mainPlayer.money;
   }
 
   void setPlayerData(Player player) {

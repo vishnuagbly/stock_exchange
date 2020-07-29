@@ -16,7 +16,7 @@ class LockedMenuOptions extends StatelessWidget {
     return StreamBuilder(
         stream: Network.firestore
             .document(
-                "${Network.gameDataPath}/${Network.playersTurnDocumentName}")
+                "${Network.gameDataPath}/$playersTurnDocumentName")
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {

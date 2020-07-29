@@ -32,6 +32,6 @@ class RoundLoadingStatus {
   static Future<void> send(roundLoadingStatus statusEnum) async {
     RoundLoadingStatus status = RoundLoadingStatus(statusEnum);
     await Network.createDocument(
-        Network.nextRoundStatusDocName, status.toMap());
+        nextRoundStatusDocName, status.toMap());
   }
 }

@@ -86,7 +86,7 @@ class TradeAlert extends Alert {
             await Network.updateAllMainPlayerData();
             TradeAccepted tradeAccepted = TradeAccepted(tradeDetails);
             Network.createDocument(
-                "${Network.alertDocumentName}/$uuid/${Network.authId}",
+                "$alertDocumentName/$uuid/${Network.authId}",
                 tradeAccepted.toMap());
             Navigator.of(context).pop();
             showDialog(
@@ -144,7 +144,7 @@ class TradeAlert extends Alert {
           onPressed: () async {
             TradeDeclined tradeDeclined = TradeDeclined();
             await Network.createDocument(
-                "${Network.alertDocumentName}/$uuid/${Network.authId}",
+                "$alertDocumentName/$uuid/${Network.authId}",
                 tradeDeclined.toMap());
             Navigator.of(context).pop();
           },

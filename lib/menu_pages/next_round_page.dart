@@ -65,8 +65,7 @@ class NextRoundPage extends StatelessWidget {
 Future<void> onlineNext() async {
   if (!playerManager.lastTurn()) {
     PlayerTurn playerTurn = PlayerTurn.next();
-    await Network.updateData(
-        Network.playersTurnDocumentName, playerTurn.toMap());
+    await Network.updateData(playersTurnDocumentName, playerTurn.toMap());
     return;
   }
   await startNextOnlineRound();
@@ -75,7 +74,7 @@ Future<void> onlineNext() async {
 Future<void> startNextOnlineRound() async {
   log("stariting next round", name: "startNextOnlineRound");
   List<Map<String, dynamic>> allPlayersMap =
-      await Network.getAllDocuments(Network.playerFullDataCollectionPath);
+      await Network.getAllDocuments(playerFullDataCollectionPath);
 //  log("got playrs: ${allPlayersMap.toString()}", name: "startNextOnlineRound");
   List<Player> allPlayers = Player.allFullPlayersFromMap(allPlayersMap);
   sendRoundCompleteAlert(allPlayers);
@@ -90,7 +89,7 @@ void sendRoundCompleteAlert(List<Player> allPlayers) async {
   CompletingRound completingRound = CompletingRound();
   for (Player player in allPlayers) {
     Network.createDocument(
-        "${Network.alertDocumentName}/${player.uuid}/${Network.authId}",
+        "$alertDocumentName/${player.uuid}/${Network.authId}",
         completingRound.toMap());
   }
   log("sent alert to everyone", name: "setRoundCompleteAlert");

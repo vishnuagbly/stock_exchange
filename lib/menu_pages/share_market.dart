@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:stockexchange/components/components.dart';
+import 'package:stockexchange/components/dialogs/future_dialog.dart';
 import 'package:stockexchange/global.dart';
 import 'dart:math' as maths;
 import 'package:stockexchange/backend_files/backend_files.dart';
+import 'package:stockexchange/network/network.dart';
+import 'package:stockexchange/network/transactions.dart';
 
 class ShareMarket {
-
   static BuildContext context;
 
-  static InputBoard buyPage(BuildContext newContext){
+  static InputBoard buyPage(BuildContext newContext) {
     context = newContext;
     int shares;
     return InputBoard(
@@ -21,36 +23,50 @@ class ShareMarket {
       ],
       inputOnSubmitted: [
         callBuySellSharePageManager(submitted: true),
-        callBuySellSharePageManager(
-            submitted: true, invert: true),
+        callBuySellSharePageManager(submitted: true, invert: true),
       ],
       onPressedButton: (specs) {
         if (specs.inputTextControllers[0].text.isEmpty) {
           specs.showError(["Shares are important to tell"]);
+          return;
+        }
+        Company selectedCompany = getCompany(specs.dropDownValue);
+        checkBuySellInputLimitsAndTakeAction(specs, false);
+        shares = specs.getTextFieldIntValue(0);
+        Player mainPlayer = playerManager.mainPlayer();
+        specs.checkAndTakeActionIfCompanyIsBankrupt(context);
+        if (shares > selectedCompany.leftShares) {
+          specs.showError(["", "there not enough shares left"]);
+          return;
+        }
+        if (Network.onlineMode) {
+          FutureDialog(
+              future: Transaction.buyShares(
+                  companies.indexOf(selectedCompany), shares),
+              loadingText: 'Buying Shares',
+              hasData: (_) => CommonAlertDialog("Pusrchase Successful"),
+              hasError: (_) => CommonAlertDialog(
+                    "Something went wrong",
+                    icon: Icon(
+                      Icons.block,
+                      color: Colors.red,
+                    ),
+                  ));
         } else {
-          Company tempCompany = getCompany(specs.dropDownValue);
-          checkBuySellInputLimitsAndTakeAction(specs, false);
-          shares = specs.getTextFieldIntValue(0);
-          Player mainPlayer = playerManager.mainPlayer();
-          specs.checkAndTakeActionIfCompanyIsBankrupt(context);
-          if (shares <= tempCompany.leftShares) {
-            mainPlayer.buyShares(
-                companies.indexOf(tempCompany), shares);
-            playerManager.setMainPlayerValues(mainPlayer);
-            specs.setBoardState(() {
-              specs.inputTextControllers[1].text =
-                  (shares * tempCompany.getCurrentSharePrice())
-                      .toInt()
-                      .toString();
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return CommonAlertDialog(
-                      "Purchase Successful");
-                },
-              );
-            });
-          }
+          mainPlayer.buyShares(companies.indexOf(selectedCompany), shares);
+          playerManager.setMainPlayerValues(mainPlayer);
+          specs.setBoardState(() {
+            specs.inputTextControllers[1].text =
+                (shares * selectedCompany.getCurrentSharePrice())
+                    .toInt()
+                    .toString();
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return CommonAlertDialog("Purchase Successful");
+              },
+            );
+          });
         }
       },
     );
@@ -104,11 +120,11 @@ class ShareMarket {
   }
 
   static void buySellSharePageManager(
-      InputBoardSpecs inputBoardSpecs,
-      bool invert,
-      bool submitted, {
-        bool sell: false,
-      }) {
+    InputBoardSpecs inputBoardSpecs,
+    bool invert,
+    bool submitted, {
+    bool sell: false,
+  }) {
     print("<-------------- Reached BuySellConverter --------------->");
     inputBoardSpecs.clearErrors();
     inputBoardSpecs.checkAndTakeActionIfCompanyIsBankrupt(context);
@@ -125,7 +141,8 @@ class ShareMarket {
       specs.inputTextControllers[1].text = '';
   }
 
-  static void checkBuySellInputLimitsAndTakeAction(InputBoardSpecs specs, bool sell) {
+  static void checkBuySellInputLimitsAndTakeAction(
+      InputBoardSpecs specs, bool sell) {
     String selectedCompanyName = specs.dropDownValue;
     Company selectedCompany = getCompany(selectedCompanyName);
     List<int> inputLimits = buySellPageInputLimits(selectedCompany, sell);
@@ -155,7 +172,7 @@ class ShareMarket {
       inputLimits[1] = playerManager.mainPlayer().money;
     } else {
       inputLimits[0] =
-      playerManager.mainPlayer().shares[companies.indexOf(tempCompany)];
+          playerManager.mainPlayer().shares[companies.indexOf(tempCompany)];
       inputLimits[1] =
           (tempCompany.getCurrentSharePrice() * inputLimits[0]).toInt();
     }
@@ -187,5 +204,4 @@ class ShareMarket {
     for (int i = 0; i < companies.length; i++) result.add(companies[i].name);
     return result;
   }
-
 }

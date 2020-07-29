@@ -57,7 +57,7 @@ class TotalAssetsPlayersOnline extends StatelessWidget {
     String logName = "TotalAssetsPlayerOnline";
     return StreamBuilder<DocumentSnapshot>(
       stream: Network.firestore
-          .document("${Network.gameDataPath}/${Network.roomDataDocumentName}")
+          .document("${Network.gameDataPath}/$roomDataDocumentName")
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {

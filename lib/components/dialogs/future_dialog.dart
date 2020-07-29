@@ -62,7 +62,9 @@ class FutureDialog<T> extends StatelessWidget {
     return FutureBuilder<T>(
       future: future,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.hasData ||
+            (snapshot.connectionState == ConnectionState.done &&
+                !snapshot.hasError)) {
           if (hasData != null)
             return hasData(dialog);
           else

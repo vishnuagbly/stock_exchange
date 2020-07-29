@@ -32,7 +32,7 @@ class CompletingRound extends Alert {
       barrierDismissible: false,
       builder: (context){
         return StreamBuilder<DocumentSnapshot>(
-          stream: Network.getDocumentStream(Network.nextRoundStatusDocName),
+          stream: Network.getDocumentStream(nextRoundStatusDocName),
           builder: (context, snapshot){
             String status = "Completing Round";
             if(snapshot.data != null && snapshot.data.data != null){

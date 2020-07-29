@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockexchange/json_classes/json_classes.dart';
-import 'dart:io';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/network/network.dart';
 import 'package:flutter/material.dart';
-import 'package:stockexchange/pages/all_pages.dart';
 
 class OnlineRoom extends StatelessWidget {
   @override
@@ -26,13 +24,12 @@ class OnlineRoom extends StatelessWidget {
               child: StreamBuilder<DocumentSnapshot>(
                 stream: Network.firestore
                     .document(
-                        "${Network.gameDataPath}/${Network.roomDataDocumentName}")
+                        "${Network.gameDataPath}/$roomDataDocumentName")
                     .snapshots(),
                 builder: (context, snapshot) {
-                  if(snapshot.connectionState == ConnectionState.waiting)
+                  if (snapshot.connectionState == ConnectionState.waiting)
                     return CircularProgressIndicator();
-                  if (!snapshot.hasData)
-                    return RoomDoesNotExist();
+                  if (!snapshot.hasData) return RoomDoesNotExist();
                   print("snapshot contains data creating online room");
                   print("data: ${snapshot.data.documentID}");
                   DocumentSnapshot roomDataDocument = snapshot.data;
@@ -63,10 +60,12 @@ class OnlineRoom extends StatelessWidget {
                   }
                   if (roomData.playerIds.length == roomData.totalPlayers) {
                     print(roomData.toMap().toString());
-                    startGame(context);
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.popUntil(context, ModalRoute.withName("/"));
-                    });
+                    startGame(context).then(
+                      (value) =>
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                        Navigator.popUntil(context, ModalRoute.withName("/"));
+                      }),
+                    );
                   }
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -81,13 +80,13 @@ class OnlineRoom extends StatelessWidget {
     );
   }
 
-  void startGame(BuildContext context) async {
+  Future<void> startGame(BuildContext context) async {
     await getAndSetPlayerData();
   }
 
   Future<void> getAndSetPlayerData() async {
     playerManager.setAllPlayersData(
-        await Network.getAllDocuments(Network.playerDataCollectionPath));
+        await Network.getAllDocuments(playerDataCollectionPath));
     await Network.checkAndDownloadPlayersData();
     await Network.checkAndDownLoadCompaniesData();
   }

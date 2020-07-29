@@ -239,7 +239,7 @@ class _CompanyStatsState extends State<CompanyStats> {
   String pointGraphButtonString = "All Rounds";
   Company company;
   Stream<DocumentSnapshot> stream =
-      Network.getDocumentStream(Network.companiesDataDocumentName);
+      Network.getDocumentStream(companiesDataDocumentName);
   StreamSubscription<DocumentSnapshot> companiesSubscription;
 
   _CompanyStatsState(this.company) {
@@ -348,7 +348,7 @@ class _CompanyStatsState extends State<CompanyStats> {
 
   Widget pieChartSection(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: Network.getCollectionStream(Network.playerDataCollectionPath),
+      stream: Network.getCollectionStream(playerDataCollectionPath),
       builder: (context, snapshot) {
         if (snapshot.data != null && snapshot.data.documents.length > 0) {
           List<Map<String, dynamic>> players = [];

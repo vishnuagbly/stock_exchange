@@ -16,32 +16,25 @@ class Network {
   static final onlineMode = false;
   static String authId;
 
+  static String get alertCollectionPath => "$alertDocumentName/$authId";
+
+  static String get gameDataPath => "$roomName";
+
   static Network get instance => Network();
 
   static String roomName = "null";
-  static final String roomDataDocumentName = "room_data";
-  static final String nextRoundStatusDocName = "round_loading_status";
-  static final String alertDocumentName = "alert";
 
-  static String get alertCollectionPath => "$alertDocumentName/$authId";
+  static DocumentReference get mainPlayerFullDataDocRef =>
+      firestore.document('$roomName/$playerFullDataCollectionPath/$authId');
 
-  static final String playerDataDocumentName = "players_data";
+  static DocumentReference get mainPlayerDataDocRef =>
+      firestore.document('$roomName/$playerDataCollectionPath/$authId');
 
-  static String get playerDataCollectionPath =>
-      "$roomDataDocumentName/$playerDataDocumentName";
+  static DocumentReference get roomDataDocRef =>
+      firestore.document('$roomName/$roomDataDocumentName');
 
-  static final String companiesDataDocumentName = "companies_data";
-
-  static String get companiesDataDocumentPath => companiesDataDocumentName;
-
-  static final String playersFullDataDocumentName = "Players_full_data";
-
-  static String get playerFullDataCollectionPath =>
-      "$roomDataDocumentName/$playersFullDataDocumentName";
-
-  static final String playersTurnDocumentName = "players_turn";
-
-  static String get gameDataPath => "$roomName";
+  static DocumentReference get companiesDataDocRef =>
+      firestore.document('$roomName/$companiesDataDocumentPath');
 
   static Future<bool> checkInternetConnection() async {
     try {
