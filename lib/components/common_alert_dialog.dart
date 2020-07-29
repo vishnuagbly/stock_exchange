@@ -3,10 +3,11 @@ import 'package:stockexchange/global.dart';
 
 class CommonAlertDialog extends AlertDialog {
   final String titleString;
+  final Widget content;
   final Icon icon;
   final Function onPressed;
 
-  CommonAlertDialog(this.titleString, {this.icon, this.onPressed});
+  CommonAlertDialog(this.titleString, {this.icon, this.onPressed, this.content});
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +19,7 @@ class CommonAlertDialog extends AlertDialog {
         ),
       ),
       backgroundColor: Color(kAlertDialogBackgroundColorCode),
+      content: content,
       title: Row(
         children: <Widget>[
           Expanded(

@@ -123,8 +123,8 @@ class Network {
       data.playerIds.add(PlayerId(playerManager.mainPlayerName, authId));
       data.allPlayersTotalAssetsBarCharData
           .add(playerManager.mainPlayer().totalAssets());
-      await updateData(roomDataDocumentName, data.toMap());
       await uploadMainPlayerAllData();
+      await updateData(roomDataDocumentName, data.toMap());
     } else {
       for (int i = 0; i < data.playerIds.length; i++)
         if (data.playerIds[i].uuid == authId) {
@@ -149,9 +149,9 @@ class Network {
     log("roomName: $roomName", name: "updateAllMainPlayerData");
     mainPlayerCards.value++;
     balance.value = playerManager.mainPlayer().money;
-    updateData("$playerDataCollectionPath/$authId",
+    await updateData("$playerDataCollectionPath/$authId",
         playerManager.mainPlayer().toMap());
-    updateMainPlayerFullData();
+    await updateMainPlayerFullData();
     Map<String, dynamic> dataMap = await getData(roomDataDocumentName);
     RoomData roomData = RoomData.fromMap(dataMap);
     List<BarChartData> totalAssets = roomData.allPlayersTotalAssetsBarCharData;
@@ -159,7 +159,7 @@ class Network {
       if (totalAssets[i].domain == playerManager.mainPlayerName)
         totalAssets[i] = playerManager.mainPlayer().totalAssets();
     roomData.allPlayersTotalAssetsBarCharData = totalAssets;
-    updateData("$roomDataDocumentName", roomData.toMap());
+    await updateData("$roomDataDocumentName", roomData.toMap());
   }
 
   static Future<void> updateMainPlayerFullData() async {

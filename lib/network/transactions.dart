@@ -7,17 +7,21 @@ import 'package:stockexchange/network/network.dart';
 class Transaction {
   static final firestore = Firestore.instance;
 
-  static Future<void> buyShares(int companyIndex, int shares) async {
+  static Future<void> buySellShares(
+      int companyIndex, int shares, bool sellShares) async {
     Player mainPlayer;
     await firestore.runTransaction((transaction) async {
-      var companiesSnapshot = await transaction.get(
-          Network.companiesDataDocRef);
-      var mainPlayerSnapshot = await transaction.get(
-          Network.mainPlayerFullDataDocRef);
+      var companiesSnapshot =
+          await transaction.get(Network.companiesDataDocRef);
+      var mainPlayerSnapshot =
+          await transaction.get(Network.mainPlayerFullDataDocRef);
       companies =
           Company.allCompaniesFromMap(companiesSnapshot.data['companies']);
       mainPlayer = Player.fromFullMap(mainPlayerSnapshot.data);
-      mainPlayer.buyShares(companyIndex, shares);
+      if (sellShares)
+        mainPlayer.sellShares(companyIndex, shares);
+      else
+        mainPlayer.buyShares(companyIndex, shares);
       var roomDataSnapshot = await transaction.get(Network.roomDataDocRef);
       RoomData roomData = RoomData.fromMap(roomDataSnapshot.data);
       var totalAssets = roomData.allPlayersTotalAssetsBarCharData;
@@ -38,6 +42,4 @@ class Transaction {
       });
     }).then((_) => playerManager.setOfflineMainPlayerData(mainPlayer));
   }
-
-
 }

@@ -307,7 +307,6 @@ class Player {
     this.shares[companyIndex] -= shares;
     _money += (shares * companies[companyIndex].getCurrentSharePrice()).toInt();
     if (mainPlayer) balance.value = _money;
-    Network.updateCompaniesData();
   }
 
   void buyShares(int companyIndex, int shares) {

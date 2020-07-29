@@ -4,7 +4,6 @@ import 'package:stockexchange/components/dialogs/future_dialog.dart';
 import 'package:stockexchange/global.dart';
 import 'dart:math' as maths;
 import 'package:stockexchange/backend_files/backend_files.dart';
-import 'package:stockexchange/network/network.dart';
 import 'package:stockexchange/network/transactions.dart';
 
 class ShareMarket {
@@ -39,19 +38,28 @@ class ShareMarket {
           specs.showError(["", "there not enough shares left"]);
           return;
         }
-        if (Network.onlineMode) {
-          FutureDialog(
-              future: Transaction.buyShares(
-                  companies.indexOf(selectedCompany), shares),
+        if (online) {
+          int price = (shares * selectedCompany.getCurrentSharePrice()).toInt();
+          specs.inputTextControllers[1].text = price.toString();
+          showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (context) => FutureDialog(
+              future: Transaction.buySellShares(
+                  companies.indexOf(selectedCompany), shares, false),
               loadingText: 'Buying Shares',
-              hasData: (_) => CommonAlertDialog("Pusrchase Successful"),
-              hasError: (_) => CommonAlertDialog(
-                    "Something went wrong",
-                    icon: Icon(
-                      Icons.block,
-                      color: Colors.red,
-                    ),
-                  ));
+              hasData: (_) => CommonAlertDialog(
+                "Pusrchase Successful",
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('price:   $kRupeeChar${price.toString()}'),
+                    Text('shares:   $shares'),
+                  ],
+                ),
+              ),
+            ),
+          );
         } else {
           mainPlayer.buyShares(companies.indexOf(selectedCompany), shares);
           playerManager.setMainPlayerValues(mainPlayer);
@@ -87,27 +95,51 @@ class ShareMarket {
         callBuySellSharePageManager(invert: true, submitted: true, sell: true),
       ],
       onPressedButton: (specs) {
-        Company tempCompany = getCompany(specs.dropDownValue);
+        Company selectedCompany = getCompany(specs.dropDownValue);
         checkBuySellInputLimitsAndTakeAction(specs, true);
         int shares = specs.getAllTextFieldIntValues()[0];
         Player mainPlayer = playerManager.mainPlayer();
         specs.checkAndTakeActionIfCompanyIsBankrupt(context);
-        if (shares <= mainPlayer.shares[companies.indexOf(tempCompany)]) {
-          mainPlayer.sellShares(companies.indexOf(tempCompany), shares);
-          playerManager.setMainPlayerValues(mainPlayer);
-          specs.setBoardState(() {
-            specs.inputTextControllers[1].text =
-                (shares * tempCompany.getCurrentSharePrice())
-                    .toInt()
-                    .toString();
+        if (shares <= mainPlayer.shares[companies.indexOf(selectedCompany)]) {
+          if (online) {
+            int price =
+                (shares * selectedCompany.getCurrentSharePrice()).toInt();
+            specs.inputTextControllers[1].text = price.toString();
             showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return CommonAlertDialog("Sold Successfully");
-                });
-          });
+              barrierDismissible: false,
+              context: context,
+              builder: (context) => FutureDialog(
+                future: Transaction.buySellShares(
+                    companies.indexOf(selectedCompany), shares, true),
+                loadingText: 'Selling Shares',
+                hasData: (_) => CommonAlertDialog(
+                  "Sold Successfully",
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('price:   $kRupeeChar${price.toString()}'),
+                      Text('shares:   $shares'),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          } else {
+            mainPlayer.sellShares(companies.indexOf(selectedCompany), shares);
+            playerManager.setMainPlayerValues(mainPlayer);
+            specs.setBoardState(() {
+              specs.inputTextControllers[1].text =
+                  (shares * selectedCompany.getCurrentSharePrice())
+                      .toInt()
+                      .toString();
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return CommonAlertDialog("Sold Successfully");
+                  });
+            });
+          }
         }
-//                        currentPage.value = StockPage.home;
       },
     );
   }
