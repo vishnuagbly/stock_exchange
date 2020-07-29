@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stockexchange/charts/bar_chart.dart';
 import 'package:stockexchange/global.dart';
@@ -43,15 +44,15 @@ class Network {
   static String get gameDataPath => "$roomName";
 
   static Future<bool> checkInternetConnection() async {
-    try{
+    try {
 //      log("checking Internet connection", name: "checkInternetConnection");
       final result = await InternetAddress.lookup("google.com");
-      if(result.isNotEmpty && result[0].rawAddress.isNotEmpty){
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         log("got Internet connection", name: "checkInternetConnection");
         return true;
       }
       return false;
-    } on SocketException catch(_){
+    } on SocketException catch (_) {
       return false;
     }
   }
@@ -129,8 +130,8 @@ class Network {
       data.playerIds.add(PlayerId(playerManager.mainPlayerName, authId));
       data.allPlayersTotalAssetsBarCharData
           .add(playerManager.mainPlayer().totalAssets());
-      updateData(roomDataDocumentName, data.toMap());
-      uploadMainPlayerAllData();
+      await updateData(roomDataDocumentName, data.toMap());
+      await uploadMainPlayerAllData();
     } else {
       for (int i = 0; i < data.playerIds.length; i++)
         if (data.playerIds[i].uuid == authId) {
@@ -151,8 +152,7 @@ class Network {
   }
 
   static Future<void> updateAllMainPlayerData() async {
-    if(roomName == "null")
-      return;
+    if (roomName == "null") return;
     log("roomName: $roomName", name: "updateAllMainPlayerData");
     mainPlayerCards.value++;
     balance.value = playerManager.mainPlayer().money;
@@ -170,23 +170,24 @@ class Network {
   }
 
   static Future<void> updateMainPlayerFullData() async {
-    if(roomName == "null")
-      return;
+    if (roomName == "null") return;
     updateData("$playerFullDataCollectionPath/$authId",
         playerManager.mainPlayer().toFullDataMap());
   }
 
   static Future<void> updateCompaniesData() async {
-    if(roomName == "null")
-      return;
+    if (roomName == "null") return;
     updateData(companiesDataDocumentName, {
       "companies": Company.allCompaniesToMap(companies),
     });
   }
 
   static Future<void> checkAndDownLoadCompaniesData() async {
-    Stream<DocumentSnapshot> stream = getDocumentStream("$companiesDataDocumentName");
+    Stream<DocumentSnapshot> stream =
+        getDocumentStream("$companiesDataDocumentName");
     stream.listen((DocumentSnapshot snapshot) {
+      if (snapshot.data == null)
+        throw PlatformException(code: 'COMPANIES_DATA_NULL');
       Map<String, dynamic> companiesDataMap = snapshot.data;
       homeListChanged.value++;
       log("downloaded companies data", name: "checkAndDownloadCompaniesData");
@@ -206,7 +207,7 @@ class Network {
     stream.listen((QuerySnapshot snapshot) {
       log("downloaded players data", name: "checkAndDownloadPlayersData");
       List<Map<String, dynamic>> allPlayersData = [];
-      for(DocumentSnapshot documentSnapshot in snapshot.documents)
+      for (DocumentSnapshot documentSnapshot in snapshot.documents)
         allPlayersData.add(documentSnapshot.data);
       playerManager.updateAllPlayersData(allPlayersData);
       log("updated players data", name: "checkAndDownloadPlayersData");

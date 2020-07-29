@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stockexchange/network/network.dart';
 import 'package:stockexchange/components/input_board.dart';
+import 'package:stockexchange/pages/all_pages.dart';
 
 class JoinRoom extends StatelessWidget {
   @override
@@ -21,9 +22,15 @@ class JoinRoom extends StatelessWidget {
               inputType: [TextInputType.text],
               onPressedButton: (specs) {
                 Network.roomName = specs.inputTextControllers[0].text;
-                Network.joinRoom().then((joined) {
-                  Navigator.pushNamed(context, "/online_room");
-                }).catchError((errorText) => specs.showError([errorText]));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoadingScreen<bool>(
+                      future: Network.joinRoom(),
+                      func: (_) => OnlineRoom(),
+                    ),
+                  ),
+                );
               }),
         ),
       ),
