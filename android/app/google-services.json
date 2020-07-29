@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "370356412324",
+    "firebase_url": "https://stock-exchange-b89bf.firebaseio.com",
+    "project_id": "stock-exchange-b89bf",
+    "storage_bucket": "stock-exchange-b89bf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:370356412324:android:434d7108a8ce9c0d736b31",
+        "android_client_info": {
+          "package_name": "com.vishnuworld.stockexchange"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "370356412324-ps6ek7i74ep7g460kin7u5bsfi0sij8c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrHBB-I-he5sO_vXsNcFK9s0vphs6XaZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "370356412324-ps6ek7i74ep7g460kin7u5bsfi0sij8c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
