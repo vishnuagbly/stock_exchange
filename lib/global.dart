@@ -38,7 +38,7 @@ String getPageTitle (StockPage page) {
   switch (page) {
     case StockPage.home:
       {
-        return "Home StockPage";
+        return "Home Page";
       }
     case StockPage.cards:
       {

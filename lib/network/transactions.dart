@@ -61,6 +61,8 @@ class Transaction {
           await transaction.get(Network.playerFullDataRef(requesterId));
       var requestedSnapshot =
           await transaction.get(Network.playerFullDataRef(requestedId));
+      var roomDataSnapshot = await transaction.get(Network.roomDataDocRef);
+      RoomData roomData = RoomData.fromMap(roomDataSnapshot.data);
       if (requesterSnapshot.data == null) {
         throw PlatformException(
           code: 'PLAYER_NOT_FOUND',
@@ -100,6 +102,15 @@ class Transaction {
       }
       log('trade completed requester: ${requester.toMap()} requested: ${requested.toMap()}',
           name: 'Transaction.makeTrade');
+      var totalAssets = roomData.allPlayersTotalAssetsBarCharData;
+      for (int i = 0; i < totalAssets.length; i++){
+        if(totalAssets[i].domain == requester.name)
+          totalAssets[i] = requester.totalAssets();
+        if(totalAssets[i].domain == requested.name)
+          totalAssets[i] = requested.totalAssets();
+      }
+      roomData.allPlayersTotalAssetsBarCharData = totalAssets;
+      await transaction.update(Network.roomDataDocRef, roomData.toMap());
       await transaction.update(
           Network.playerFullDataRef(requesterId), requester.toFullDataMap());
       await transaction.update(
