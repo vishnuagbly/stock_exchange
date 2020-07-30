@@ -299,7 +299,7 @@ class Network {
       if (documentName != null)
         await firestore.document("$gameDataPath/$documentName").setData(data);
       else
-        await firestore.collection(gameDataPath).add(data);;
+        await firestore.collection(gameDataPath).add(data);
       return Future.value(true);
     } catch (error) {
       print(error);

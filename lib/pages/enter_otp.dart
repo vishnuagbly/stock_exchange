@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stockexchange/components/input_board.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stockexchange/global.dart';
-import 'loading_screen.dart';
 import 'package:stockexchange/network/network.dart';
-
-import 'online_room.dart';
 
 class EnterOTP extends StatelessWidget {
   static final _auth = FirebaseAuth.instance;

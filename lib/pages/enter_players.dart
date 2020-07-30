@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stockexchange/components/components.dart';
 import 'package:stockexchange/network/network.dart';
 import 'package:stockexchange/global.dart';
-import 'package:stockexchange/pages/all_pages.dart';
 
 class EnterTotalPlayers extends StatelessWidget {
   @override
