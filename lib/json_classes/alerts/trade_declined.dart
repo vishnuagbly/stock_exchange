@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stockexchange/components/common_alert_dialog.dart';
+import 'file:///D:/FlutterProjects/stock_exchange/lib/components/dialogs/common_alert_dialog.dart';
 import 'package:stockexchange/json_classes/alerts/alert.dart';
 
 class TradeDeclined extends Alert {

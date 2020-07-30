@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:stockexchange/network/network.dart';
 import 'pages/all_pages.dart';
 import 'global.dart';
 
@@ -43,7 +44,10 @@ class MyApp extends StatelessWidget {
               behavior: MyBehavior(),
               child: HomePage(),
             ),
-        kOnlineRoomName: (BuildContext context) => OnlineRoom(),
+        kCreateOnlineRoomName: (BuildContext context) => LoadingScreen(
+          future: Network.createRoom(),
+          func: (_) => OnlineRoom(),
+        ),
         kJoinRoomName: (BuildContext context) => JoinRoom(),
         kLoginPageName: (BuildContext context) => LoginPage(),
         kEnterPlayersPageName: (BuildContext context) => EnterTotalPlayers(),

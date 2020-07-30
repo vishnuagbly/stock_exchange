@@ -1,7 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:stockexchange/components/common_alert_dialog.dart';
+import 'file:///D:/FlutterProjects/stock_exchange/lib/components/dialogs/common_alert_dialog.dart';
+import 'package:stockexchange/components/dialogs/loading_dialog.dart';
 
 class FutureDialog<T> extends StatelessWidget {
   FutureDialog({
@@ -51,21 +52,7 @@ class FutureDialog<T> extends StatelessWidget {
             );
           }
         }
-        return AlertDialog(
-          title: Row(
-            children: [
-              Text(loadingText),
-              SizedBox(width: 20),
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: FittedBox(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-            ],
-          ),
-        );
+        return LoadingDialog(loadingText);
       },
     );
   }

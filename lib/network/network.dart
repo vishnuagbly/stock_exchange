@@ -71,6 +71,12 @@ class Network {
     return uuid;
   }
 
+  static void deleteAuthId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    authId = null;
+    await prefs.remove('uuid');
+  }
+
   static Future<void> createRoomName() async {
     roomName = playerManager.mainPlayerName + rand.nextInt(1000).toString();
     if (await documentExists(roomDataDocumentName)) createRoomName();

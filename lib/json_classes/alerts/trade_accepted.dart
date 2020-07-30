@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:stockexchange/backend_files/backend_files.dart';
-import 'package:stockexchange/components/common_alert_dialog.dart';
+import 'package:stockexchange/components/dialogs/common_alert_dialog.dart';
 import 'package:stockexchange/components/components.dart';
 import 'package:stockexchange/components/dialogs/future_dialog.dart';
 import 'package:stockexchange/global.dart';

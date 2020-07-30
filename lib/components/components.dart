@@ -4,7 +4,7 @@ export 'app_bar_actions.dart';
 export 'app_bar_leading_arrow.dart';
 export 'buy_shares_button.dart';
 export 'card.dart';
-export 'common_alert_dialog.dart';
+export 'dialogs/common_alert_dialog.dart';
 export 'company_slates.dart';
 export 'input_board.dart';
 export 'menu_slate.dart';

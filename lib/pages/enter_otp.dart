@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:stockexchange/components/input_board.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stockexchange/global.dart';
+import 'loading_screen.dart';
 import 'package:stockexchange/network/network.dart';
+
+import 'online_room.dart';
 
 class EnterOTP extends StatelessWidget {
   static final _auth = FirebaseAuth.instance;
@@ -39,8 +42,7 @@ class EnterOTP extends StatelessWidget {
                   print("UUID: ${authResult.user.uid}");
                   Network.setAuthId(authResult.user.uid);
                   if(roomCreator){
-                    Network.createRoom();
-                    Navigator.pushNamed(context, "/online_room");
+                    Navigator.pushNamed(context, kCreateOnlineRoomName);
                   }
                   else
                     Navigator.pushNamed(context, "/join_room");

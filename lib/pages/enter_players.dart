@@ -58,19 +58,11 @@ class EnterTotalPlayers extends StatelessWidget {
                 else if (online) {
                   String authId = await Network.getAuthId();
                   if (authId == null)
-                    Navigator.pushNamed(context, "/login_page");
+                    Navigator.pushNamed(context, kLoginPageName);
                   else {
                     specs.showInfo(["You are now online"]);
                     print("uuid: $authId");
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LoadingScreen<void>(
-                          future: Network.createRoom(),
-                          func: (_) => OnlineRoom(),
-                        ),
-                      ),
-                    );
+                    Navigator.pushNamed(context, kCreateOnlineRoomName);
                   }
                 }
               }

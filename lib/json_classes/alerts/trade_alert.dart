@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:stockexchange/backend_files/backend_files.dart';
-import 'package:stockexchange/components/common_alert_dialog.dart';
+import 'file:///D:/FlutterProjects/stock_exchange/lib/components/dialogs/common_alert_dialog.dart';
 import 'package:stockexchange/network/transactions.dart';
 import 'trade_accepted.dart';
 import 'trade_declined.dart';

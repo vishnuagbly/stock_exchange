@@ -5,7 +5,7 @@ import 'package:stockexchange/components/dialogs/future_dialog.dart';
 import 'package:stockexchange/components/input_board.dart';
 import 'package:stockexchange/backend_files/player.dart';
 import 'package:stockexchange/global.dart';
-import 'package:stockexchange/components/common_alert_dialog.dart';
+import 'file:///D:/FlutterProjects/stock_exchange/lib/components/dialogs/common_alert_dialog.dart';
 
 class BuyCardsPage extends StatelessWidget {
   @override
