@@ -1,5 +1,5 @@
 import 'dart:developer';
-
+import 'package:stockexchange/backend_files/card_data.dart' as shareCard;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:stockexchange/backend_files/backend_files.dart';
@@ -103,10 +103,10 @@ class Transaction {
       log('trade completed requester: ${requester.toMap()} requested: ${requested.toMap()}',
           name: 'Transaction.makeTrade');
       var totalAssets = roomData.allPlayersTotalAssetsBarCharData;
-      for (int i = 0; i < totalAssets.length; i++){
-        if(totalAssets[i].domain == requester.name)
+      for (int i = 0; i < totalAssets.length; i++) {
+        if (totalAssets[i].domain == requester.name)
           totalAssets[i] = requester.totalAssets();
-        if(totalAssets[i].domain == requested.name)
+        if (totalAssets[i].domain == requested.name)
           totalAssets[i] = requested.totalAssets();
       }
       roomData.allPlayersTotalAssetsBarCharData = totalAssets;
@@ -129,4 +129,66 @@ class Transaction {
       throw error;
     });
   }
+
+  static Future<void> startNextRound() async {
+    sendRoundCompleteAlert();
+    var playerRefs = Network.allPlayersFullDataRefs;
+    await firestore.runTransaction((transaction) async {
+      log("stariting next round", name: "startNextOnlineRound");
+      List<DocumentSnapshot> documents = [];
+      for (var ref in playerRefs) documents.add(await transaction.get(ref));
+      await Status.send(LoadingStatus.calculationStarted);
+      List<Player> allPlayers = Player.allFullPlayersFromMap(
+          Network.getAllDataFromDocuments(documents));
+      List<shareCard.Card> allCards = getAllCards(allPlayers);
+      await calcAndUploadSharePrices(allCards);
+      await transaction.update(Network.companiesDataDocRef, {
+        'companies': Company.allCompaniesToMap(companies),
+      });
+      await Status.send(LoadingStatus.startingNextRound);
+      await transaction.set(
+          firestore.document('${Network.roomName}/$playersTurnDocumentName'), {
+        'turns': 0,
+      });
+      for (var ref in playerRefs) await transaction.update(ref, {});
+    }).then((_) async => await Status.send(LoadingStatus.startedNextRound));
+  }
+}
+
+void sendRoundCompleteAlert() async {
+  log("sending roundLoadingStatus", name: "setRoundCompleteAlert");
+  await Status.send(LoadingStatus.gettingData);
+  log("creating completingRound object", name: "setRoundCompleteAlert");
+  CompletingRound completingRound = CompletingRound();
+  for (int i = 0; i < playerManager.totalPlayers; i++) {
+    Network.createDocument(
+        "$alertDocumentName/${playerManager.getPlayerId(index: i)}/${Network.authId}",
+        completingRound.toMap());
+  }
+  log("sent alert to everyone", name: "setRoundCompleteAlert");
+}
+
+List<shareCard.Card> getAllCards(List<Player> allPlayers) {
+  List<shareCard.Card> allCards = [];
+  Player mainPlayer = playerManager.mainPlayer();
+  for (shareCard.Card card in mainPlayer.getAllCards()) {
+    if (!card.bought && !card.traded) allCards.add(card);
+    if (allCards.length == 10) break;
+  }
+  allCards.addAll(cardBank.buyableCards);
+  for (Player player in allPlayers)
+    if (player.name != playerManager.mainPlayerName)
+      for (shareCard.Card card in player.getAllCards())
+        if (!card.traded) allCards.add(card);
+  return allCards;
+}
+
+Future<void> calcAndUploadSharePrices(List<shareCard.Card> allCards) async {
+  await Status.send(LoadingStatus.calculationCompleted);
+  List<int> shareValues = [];
+  for (int i = 0; i < companies.length; i++) shareValues.add(0);
+  for (shareCard.Card card in allCards)
+    shareValues[card.companyNum] += card.shareValueChange;
+  for (int i = 0; i < companies.length; i++)
+    companies[i].setCurrenSharePrice(shareValues[i]);
 }

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:stockexchange/components/components.dart';
+import 'package:stockexchange/components/dialogs/loading_dialog.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/json_classes/alerts/alert.dart';
 import 'package:stockexchange/json_classes/round_loading_status.dart';
@@ -39,31 +40,20 @@ class CompletingRound extends Alert {
               Map<String, dynamic> statusMap = snapshot.data.data;
               Status statusObj = Status.fromMap(statusMap);
               if(statusObj.status == LoadingStatus.startedNextRound){
-                cardBank.generateAllCards();
                 startNextRound();
                 playerManager.incrementPlayerTurn();
-                // ignore: invalid_use_of_protected_member
-                homePageState.setState(() {});
                 Network.updateAllMainPlayerData();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  // ignore: invalid_use_of_protected_member
+                  homePageState.setState(() {});
+                });
                 return CommonAlertDialog(
                   "Started Next Round",
                 );
               }
               else status = statusObj.toString();
             }
-            return MainAlertDialog(
-              title: status,
-              content: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: CircularProgressIndicator(),
-                  ),
-                ],
-              ),
-            );
+            return LoadingDialog(status);
           },
         );
       }

@@ -24,6 +24,7 @@ enum StockPage {
 }
 
 enum LoadingStatus {
+  gettingData,
   calculationStarted,
   calculationInProgress,
   calculationCompleted,

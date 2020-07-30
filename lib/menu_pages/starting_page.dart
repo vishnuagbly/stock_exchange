@@ -3,9 +3,6 @@ import 'package:stockexchange/components/input_board.dart';
 import 'package:stockexchange/global.dart';
 
 class StartingPage extends StatelessWidget {
-  StartingPage(this.homePageState);
-
-  final State homePageState;
 
   @override
   Widget build(BuildContext context) {

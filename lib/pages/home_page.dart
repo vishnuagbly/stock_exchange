@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   else if (value == StockPage.totalAssets)
                     return TotalAssetsMenuPage();
                   else if (value == StockPage.start)
-                    return StartingPage(this);
+                    return StartingPage();
                   else
                     return NextRoundPage();
                 },

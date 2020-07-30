@@ -19,6 +19,13 @@ class FutureDialog<T> extends StatelessWidget {
   final Widget Function(Object error) hasError;
 
   ///executes when either future is done with no error or returns data.
+  ///
+  ///In case of null,
+  ///```
+  ///hasData = (_) {
+  ///     return CommonAlertDialog('Done');
+  ///   }
+  ///```
   final Widget Function(T res) hasData;
 
   @override

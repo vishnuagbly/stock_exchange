@@ -16,6 +16,8 @@ class Status {
 
   String toString() {
     switch (status) {
+      case LoadingStatus.gettingData:
+        return 'Getting Data';
       case LoadingStatus.calculationStarted:
         return "Round Completed";
       case LoadingStatus.calculationInProgress:

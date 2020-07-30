@@ -27,6 +27,13 @@ class Network {
   static DocumentReference get mainPlayerFullDataDocRef =>
       playerFullDataRef(authId);
 
+  static List<DocumentReference> get allPlayersFullDataRefs {
+    List<DocumentReference> refs = [];
+    for(int i = 0; i < playerManager.totalPlayers; i++)
+      refs.add(playerFullDataRef(playerManager.getPlayerId(index: i)));
+    return refs;
+  }
+
   static DocumentReference playerFullDataRef(String uuid) =>
       firestore.document('$roomName/$playerFullDataCollectionPath/$uuid');
 
@@ -107,8 +114,8 @@ class Network {
     log('room created', name: 'createRoom');
   }
 
-  static void resetPlayerTurns() {
-    createDocument(playersTurnDocumentName, {
+  static Future<void> resetPlayerTurns() async {
+    await createDocument(playersTurnDocumentName, {
       "turns": 0,
     });
   }
@@ -225,12 +232,17 @@ class Network {
 
   static Future<List<Map<String, dynamic>>> getAllDocuments(
       String collectionPath) async {
-    List<Map<String, dynamic>> result = [];
     QuerySnapshot querySnapshot =
         await firestore.collection("$roomName/$collectionPath").getDocuments();
-    for (DocumentSnapshot document in querySnapshot.documents)
+    return getAllDataFromDocuments(querySnapshot.documents);
+  }
+
+  static List<Map<String, dynamic>> getAllDataFromDocuments(
+       List<DocumentSnapshot> documents) {
+    List<Map<String, dynamic>> result = [];
+    for (DocumentSnapshot document in documents)
       result.add(document.data);
-    return Future.value(result);
+    return result;
   }
 
   static Stream<QuerySnapshot> getCollectionStream(String collectionPath) {
