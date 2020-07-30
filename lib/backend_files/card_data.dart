@@ -63,6 +63,7 @@ class CardBank {
           _processedCards[i].shareValueChange) maxIndex = i;
     if (_processedCards[maxIndex].shareValueChange <= 0) {
       maxIndex = null;
+      dev.log('Cards not for sale', name: 'getCardPrice');
       throw "Cards not for Sale";
     }
     return (_processedCards[maxIndex].shareValueChange * playerBudget) ~/

@@ -37,9 +37,12 @@ class FutureDialog<T> extends StatelessWidget {
           if (hasError != null)
             return hasError(snapshot.error);
           else {
+            String errorMessage = 'SOME ERROR OCCURRED';
+            if(snapshot.error is String)
+              errorMessage = snapshot.error;
             log('err: ${snapshot.error.toString()}', name: 'FutureDialog');
             return CommonAlertDialog(
-              'SOME ERROR OCCURRED',
+              errorMessage,
               icon: Icon(
                 Icons.block,
                 color: Colors.red,

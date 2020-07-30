@@ -227,10 +227,11 @@ class _InputBoardState extends State<InputBoard> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            onPressed: () {
-              if (widget.onPressedButton != null)
-                widget.onPressedButton(_specs);
-            },
+            onPressed: widget.onPressedButton != null
+                ? () {
+                    widget.onPressedButton(_specs);
+                  }
+                : null,
           ),
         ],
       ),
@@ -292,7 +293,9 @@ class _InputBoardState extends State<InputBoard> {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      _specs.errorText.length > i ? _specs.errorText[i] ?? "" : "",
+                      _specs.errorText.length > i
+                          ? _specs.errorText[i] ?? ""
+                          : "",
                       style: TextStyle(
                         color: Colors.red,
                       ),

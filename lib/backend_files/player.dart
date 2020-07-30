@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:math' as maths;
 import 'package:flutter/material.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/json_classes/alerts/all_alerts.dart';
@@ -139,25 +140,35 @@ class Player {
   }
 
   int getCardPrice() {
+    if(_cardPrice == null)
+      setCardPrice();
+    if(_cardPrice == -1) throw 'cards not for sale';
     return _cardPrice;
   }
 
   void setCardPrice() {
+    log('setting card price', name: 'setCardPrice');
     try {
       _cardPrice = cardBank.getCardPrice(_money);
     } catch (error) {
+      log('Error: ${error.toString()}', name: 'setCardPrice');
       _cardPrice = -1;
     }
   }
 
-  bool buyCards(int numOfCards) {
+  int get maxBuyableCards {
+    int stock = cardBank.getBuyableCardsLength() - totalBoughtCards;
+    int cardsInBudget = money ~/ _cardPrice;
+    return maths.min(stock, cardsInBudget);
+  }
+
+  void buyCards(int numOfCards) {
     List<shareCard.Card> cards =
         cardBank.getBuyableCard(totalBoughtCards, numOfCards);
     totalBoughtCards += numOfCards;
-    if (totalBoughtCards >= cardBank.getBuyableCardsLength()) return false;
+    if (totalBoughtCards >= cardBank.getBuyableCardsLength()) throw 'We do not have enough cards to sell.';
     addCards(cards, bought: true);
     addMoney(numOfCards * _cardPrice * -1);
-    return true;
   }
 
   void setAllCards(List<shareCard.Card> cards,
@@ -465,18 +476,18 @@ class PlayerManager {
     return -1;
   }
 
-  bool buyCards(Player player, int numOfCards) {
+  Future<void> buyCards(Player player, int numOfCards) async {
     int index;
     for (int i = 0; i < _allPlayers.length; i++)
       if (_allPlayers[i].name == player.name) {
         index = i;
         break;
       }
-    if (index == null) return false;
+    if (index == null) throw '${player.name} doesn\'t exist';
+    _allPlayers[index].buyCards(numOfCards);
     if (online) {
-      Network.updateAllMainPlayerData();
+      await Network.updateAllMainPlayerData();
     }
-    return _allPlayers[index].buyCards(numOfCards);
   }
 
   ///Here this is the different function to set valueNotifier as in case of
