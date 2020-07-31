@@ -24,6 +24,7 @@ enum StockPage {
 }
 
 enum LoadingStatus {
+  timeOut,
   gettingData,
   nextRoundError,
   calculationStarted,
@@ -229,9 +230,9 @@ CardBank cardBank;
 PlayerManager playerManager;
 
 ///start game
-void startGame(int value){
-  cardBank = shareCard.CardBank(value, companies);
-  playerManager = PlayerManager(value, 0);
+void startGame(int totalPlayers){
+  cardBank = shareCard.CardBank(totalPlayers, companies);
+  playerManager = PlayerManager(totalPlayers, 0);
   currentPage.value = StockPage.home;
   playerManager.generatePlayers([tempPlayerName]);
   startNextRound();

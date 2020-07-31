@@ -30,9 +30,9 @@ class Player {
   int get money => _money ?? 0;
 
   set turn(int value) {
-    log('$name current turn: $_turn');
+    log('$name current turn: $_turn', name: 'setTurn');
     _turn = value;
-    log('$name new turn = $turn');
+    log('$name new turn = $turn', name: 'setTurn');
   }
 
   Player(this.name, int totalPlayers, int newTurn,
@@ -130,8 +130,15 @@ class Player {
     };
   }
 
+  int get totalPlayers => totalTradedCards.length;
+
+  set totalPlayers(int value) {
+    totalTradedCards.length = value;
+  }
+
   void incrementPlayerTurn() {
     log("current player $name turn $turn", name: "incrementPlayerTurn");
+    log('totalTradedCards: $totalTradedCards', name: 'incrementPlayerTurn');
     turn = (turn + 1) % totalTradedCards.length;
     log("new player $name turn $turn", name: "incrementPlayerTurn");
   }
@@ -432,6 +439,7 @@ class PlayerManager {
       else {
         log("player id: ${player.uuid}", name: logName);
         log("player name: ${player.name}", name: logName);
+        mainPlayer.totalPlayers = _totalPlayers;
         mainPlayer.turn = i;
         _mainPlayerIndex = i;
         _allPlayers.add(mainPlayer);

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:stockexchange/components/components.dart';
 
 ///Special Accessory function for showing loading before a page.
 ///
@@ -28,27 +29,23 @@ class LoadingScreen<T> extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData)
           return func(snapshot.data);
-        else if (snapshot.connectionState == ConnectionState.done)
-          return func(snapshot.data);
+        else if (snapshot.connectionState == ConnectionState.done &&
+            !snapshot.hasError) return func(snapshot.data);
         if (snapshot.hasError) {
           log('err: ${snapshot.error}', name: 'LoadingPage');
           String errMessage = "Something went wrong";
-          if(snapshot.error is String)
-            errMessage = snapshot.error;
+          if (snapshot.error is String) errMessage = snapshot.error;
           return errFunc != null
               ? errFunc(snapshot.error)
               : Scaffold(
-                  body: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(errMessage),
-                      SizedBox(width: 20),
-                      Icon(
+                  body: Center(
+                    child: CommonAlertDialog(
+                      errMessage,
+                      icon: Icon(
                         Icons.block,
                         color: Colors.red,
-                        size: 30,
                       ),
-                    ],
+                    ),
                   ),
                 );
         }

@@ -18,6 +18,8 @@ class Status {
     switch (status) {
       case LoadingStatus.nextRoundError:
         return 'Some Error occured';
+      case LoadingStatus.timeOut:
+        return 'It was just taking so much time';
       case LoadingStatus.gettingData:
         return 'Getting Data';
       case LoadingStatus.calculationStarted:

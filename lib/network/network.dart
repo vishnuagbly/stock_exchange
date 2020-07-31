@@ -128,18 +128,23 @@ class Network {
         await getData(companiesDataDocumentName);
     if (dataMap == null) throw "Room does not exist";
     RoomData data = RoomData.fromMap(dataMap);
+    var mainPlayer = playerManager.mainPlayer();
     outerIf:
     if (data.playerIds.length < data.totalPlayers) {
+      log("mainPlayer name: ${playerManager.mainPlayerName}", name: 'joinRoom');
       for (PlayerId playerId in data.playerIds) {
+        log('player[${playerId.name}] exists', name: 'joinRoom');
         if (playerId.uuid == authId) {
           playerManager.setMainPlayerValues(Player.fromFullMap(mainPlayerData));
           companies = Company.allCompaniesFromMap(companiesMap["companies"]);
           break outerIf;
-        } else if (playerId.name == playerManager.mainPlayerName)
+        } else if (playerId.name == playerManager.mainPlayerName) {
+          log('player name already exists', name: 'joinRoom');
           throw "${playerId.name} already exist in room restart game with different name";
+        }
       }
-      var mainPlayer = playerManager.mainPlayer();
       mainPlayer.turn = data.playerIds.length;
+      mainPlayer.totalPlayers = data.totalPlayers;
       playerManager.setMainPlayerValues(mainPlayer);
       data.playerIds.add(PlayerId(playerManager.mainPlayerName, authId));
       data.allPlayersTotalAssetsBarCharData

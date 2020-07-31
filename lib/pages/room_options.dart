@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:stockexchange/components/input_board.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/components/selection_button.dart';
 import 'package:stockexchange/network/network.dart';
@@ -66,7 +65,7 @@ class RoomOptions extends StatelessWidget {
                           Navigator.pushNamed(context, "/login_page");
                         else {
                           log("uuid: $authId", name: "roomOptions");
-                          Navigator.pushNamed(context, "/join_room");
+                          Navigator.pushNamed(context, kJoinRoomName);
                         }
                       },
                       width: screenWidth * 0.25,
@@ -80,29 +79,4 @@ class RoomOptions extends StatelessWidget {
       ),
     );
   }
-
-  Widget temp(BuildContext context) => InputBoard(
-        showDropDownMenu: false,
-        dropDownList: [],
-        sliverListType: false,
-        totalTextFields: 1,
-        inputText: ["Room Options"],
-        inputType: [TextInputType.text],
-        onPressedButton: (specs) async {
-          if (specs.inputTextControllers[0].text == "create") {
-            roomCreator = true;
-            Navigator.pushNamed(context, "/enter_players");
-          } else if (specs.inputTextControllers[0].text == "join") {
-            startGame(4);
-            String authId = await Network.getAuthId();
-            if (authId == null)
-              Navigator.pushNamed(context, "/login_page");
-            else {
-              specs.showInfo(["You are now online"]);
-              print("uuid: $authId");
-              Navigator.pushNamed(context, "/join_room");
-            }
-          }
-        },
-      );
 }

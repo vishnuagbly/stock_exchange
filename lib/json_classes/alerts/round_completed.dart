@@ -58,9 +58,10 @@ class CompletingRound extends Alert {
                     ),
                   );
                 }
-                if (statusObj.status == LoadingStatus.nextRoundError) {
+                if (statusObj.status == LoadingStatus.nextRoundError ||
+                    statusObj.status == LoadingStatus.timeOut) {
                   return CommonAlertDialog(
-                    'SOME ERROR OCCURED',
+                    statusObj.toString(),
                     icon: Icon(
                       Icons.block,
                       color: Colors.red,

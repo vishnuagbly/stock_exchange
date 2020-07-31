@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:stockexchange/network/network.dart';
 import 'package:stockexchange/components/input_board.dart';
@@ -27,7 +29,10 @@ class JoinRoom extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => LoadingScreen<bool>(
                       future: Network.joinRoom(),
-                      func: (_) => OnlineRoom(),
+                      func: (data) {
+                        log('data: $data', name: 'joiningRoomLoader');
+                        return OnlineRoom();
+                      },
                     ),
                   ),
                 );

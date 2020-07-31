@@ -163,8 +163,11 @@ class Transaction {
           await transaction.update(ref, allPlayers[i].toFullDataMap());
         }
       },
-      timeout: Duration(seconds: 10),
-    ).then((_) {
+    ).timeout(Duration(seconds: 7), onTimeout: () {
+
+      throw 'Time out';
+    })
+        .then((_) {
       log('completed transaction', name: 'startNextRound');
       Status.send(LoadingStatus.startedNextRound);
     }).catchError((err) async {
