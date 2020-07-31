@@ -138,6 +138,9 @@ class Network {
         } else if (playerId.name == playerManager.mainPlayerName)
           throw "${playerId.name} already exist in room restart game with different name";
       }
+      var mainPlayer = playerManager.mainPlayer();
+      mainPlayer.turn = data.playerIds.length;
+      playerManager.setMainPlayerValues(mainPlayer);
       data.playerIds.add(PlayerId(playerManager.mainPlayerName, authId));
       data.allPlayersTotalAssetsBarCharData
           .add(playerManager.mainPlayer().totalAssets());

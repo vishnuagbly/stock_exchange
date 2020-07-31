@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:stockexchange/components/components.dart';
+import 'package:stockexchange/components/dialogs/future_dialog.dart';
 import 'package:stockexchange/components/dialogs/loading_dialog.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/json_classes/alerts/alert.dart';
@@ -29,33 +30,48 @@ class CompletingRound extends Alert {
     String logName = "round_completed/showDialog";
     log("reached", name: logName);
     return material.showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context){
-        return StreamBuilder<DocumentSnapshot>(
-          stream: Network.getDocumentStream(loadingStatusDocName),
-          builder: (context, snapshot){
-            String status = "Completing Round";
-            if(snapshot.data != null && snapshot.data.data != null){
-              Map<String, dynamic> statusMap = snapshot.data.data;
-              Status statusObj = Status.fromMap(statusMap);
-              if(statusObj.status == LoadingStatus.startedNextRound){
-                startNextRound();
-                Network.updateAllMainPlayerData();
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  // ignore: invalid_use_of_protected_member
-                  homePageState.setState(() {});
-                });
-                return CommonAlertDialog(
-                  "Started Next Round",
-                );
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return StreamBuilder<DocumentSnapshot>(
+            stream: Network.getDocumentStream(loadingStatusDocName),
+            builder: (context, snapshot) {
+              String status = "Completing Round";
+              if (snapshot.data != null && snapshot.data.data != null) {
+                Map<String, dynamic> statusMap = snapshot.data.data;
+                Status statusObj = Status.fromMap(statusMap);
+                if (statusObj.status == LoadingStatus.startedNextRound) {
+                  startNextRound();
+                  return FutureDialog(
+                    future: Network.getAndSetMainPlayerFullData(),
+                    loadingText: 'Downloading Updates...',
+                    hasData: (_) => CommonAlertDialog(
+                      "Started Next Round",
+                      onPressed: () {
+                        log('your turn: ${playerManager.mainPlayerTurn}');
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          // ignore: invalid_use_of_protected_member
+                          homePageState.setState(() {});
+                        });
+                        Navigator.pop(context);
+                      },
+                    ),
+                  );
+                }
+                if (statusObj.status == LoadingStatus.nextRoundError) {
+                  return CommonAlertDialog(
+                    'SOME ERROR OCCURED',
+                    icon: Icon(
+                      Icons.block,
+                      color: Colors.red,
+                    ),
+                  );
+                } else
+                  status = statusObj.toString();
               }
-              else status = statusObj.toString();
-            }
-            return LoadingDialog(status);
-          },
-        );
-      }
-    );
+              return LoadingDialog(status);
+            },
+          );
+        });
   }
 }

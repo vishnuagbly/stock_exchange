@@ -1,3 +1,5 @@
+library player;
+
 import 'dart:developer';
 import 'dart:math' as maths;
 import 'package:flutter/material.dart';
@@ -20,19 +22,27 @@ class Player {
   List<int> totalTradedCards = [];
   int _boughtCard = 0;
   int totalBoughtCards = 0;
-  int turn;
+  int _turn;
+  int get turn => _turn;
   int _cardPrice;
   int _money;
 
   int get money => _money ?? 0;
 
-  Player(this.name, int totalPlayers,
+  set turn(int value) {
+    log('$name current turn: $_turn');
+    _turn = value;
+    log('$name new turn = $turn');
+  }
+
+  Player(this.name, int totalPlayers, int newTurn,
       {this.mainPlayer: false, this.online: false}) {
     this._money = 1000000;
     for (int i = 0; i < 6; i++) shares.add(0);
     for (int i = 0; i < totalPlayers; i++) {
       totalTradedCards.add(0);
     }
+    turn = newTurn;
     print("totalTradedCards player[${this.name}]: $totalTradedCards");
   }
 
@@ -46,7 +56,8 @@ class Player {
           map["totalTradedCards"],
           totalPlayers,
         ),
-        _allCards = generateDummyCards(map["totalCards"]);
+        _allCards = generateDummyCards(map["totalCards"]),
+        _turn = map["turn"];
 
   static List<int> getTotalTradedCardsFromMap(map, int totalPlayers) {
     List<int> result = map.cast<int>();
@@ -73,7 +84,8 @@ class Player {
         _boughtCard = map["_boughtCard"],
         totalBoughtCards = map["totalBoughtCards"],
         _cardPrice = map["_cardPrice"],
-        _money = map["_money"];
+        _money = map["_money"],
+        _turn = map["turn"];
 
   Map<String, dynamic> toFullDataMap() {
     return {
@@ -87,6 +99,7 @@ class Player {
       "totalBoughtCards": totalBoughtCards,
       "_cardPrice": _cardPrice,
       "_money": _money,
+      'turn': turn,
     };
   }
 
@@ -113,7 +126,14 @@ class Player {
       "totalTradedCards": totalTradedCards,
       "totalCards": _allCards.length,
       "money": money,
+      'turn': turn,
     };
+  }
+
+  void incrementPlayerTurn() {
+    log("current player $name turn $turn", name: "incrementPlayerTurn");
+    turn = (turn + 1) % totalTradedCards.length;
+    log("new player $name turn $turn", name: "incrementPlayerTurn");
   }
 
   BarChartData totalAssets() {
@@ -140,9 +160,8 @@ class Player {
   }
 
   int getCardPrice() {
-    if(_cardPrice == null)
-      setCardPrice();
-    if(_cardPrice == -1) throw 'cards not for sale';
+    if (_cardPrice == null) setCardPrice();
+    if (_cardPrice == -1) throw 'cards not for sale';
     return _cardPrice;
   }
 
@@ -166,7 +185,8 @@ class Player {
     List<shareCard.Card> cards =
         cardBank.getBuyableCard(totalBoughtCards, numOfCards);
     totalBoughtCards += numOfCards;
-    if (totalBoughtCards >= cardBank.getBuyableCardsLength()) throw 'We do not have enough cards to sell.';
+    if (totalBoughtCards >= cardBank.getBuyableCardsLength())
+      throw 'We do not have enough cards to sell.';
     addCards(cards, bought: true);
     addMoney(numOfCards * _cardPrice * -1);
   }
@@ -361,6 +381,19 @@ class Player {
   }
 }
 
+extension allPlayersExtensions on List<Player> {
+  void setNewCards(List<List<shareCard.Card>> playerCards,
+      List<List<shareCard.Card>> processedPlayerCards) {
+    for (int i = 0; i < this.length; i++) {
+      this[i].setAllCards(playerCards[i]);
+      this[i].setCardPrice();
+      for (int j = 0; j < this[i].totalTradedCards.length; j++)
+        this[i].totalTradedCards[j] = 0;
+      this[i].totalBoughtCards = 0;
+    }
+  }
+}
+
 class PlayerManager {
   String get mainPlayerName => _allPlayers[_mainPlayerIndex].name;
   int _totalPlayers;
@@ -369,9 +402,8 @@ class PlayerManager {
   int get mainPlayerIndex => _mainPlayerIndex;
 
   int get totalPlayers => _totalPlayers;
-  int _mainPlayerTurn;
 
-  int get mainPlayerTurn => _mainPlayerTurn;
+  int get mainPlayerTurn => mainPlayer().turn;
   final List<Color> colors = [
     Colors.red,
     Colors.green,
@@ -384,14 +416,7 @@ class PlayerManager {
 
   bool lastTurn() => mainPlayerTurn == (totalPlayers - 1);
 
-  void incrementPlayerTurn() {
-    log("current player turn $_mainPlayerTurn", name: "incrementPlayerTurn");
-    _mainPlayerTurn = (_mainPlayerTurn + 1) % totalPlayers;
-    log("new player turn $_mainPlayerTurn", name: "incrementPlayerTurn");
-  }
-
-  PlayerManager(this._totalPlayers, this._mainPlayerTurn)
-      : this._mainPlayerIndex = _mainPlayerTurn;
+  PlayerManager(this._totalPlayers, int turn) : this._mainPlayerIndex = turn;
 
   void setAllPlayersData(List<Map<String, dynamic>> playersMap) {
     String logName = "player/setAllPlayersData()";
@@ -407,7 +432,7 @@ class PlayerManager {
       else {
         log("player id: ${player.uuid}", name: logName);
         log("player name: ${player.name}", name: logName);
-        _mainPlayerTurn = i;
+        mainPlayer.turn = i;
         _mainPlayerIndex = i;
         _allPlayers.add(mainPlayer);
       }
@@ -434,10 +459,11 @@ class PlayerManager {
         _allPlayers.add(Player(
           playerNames[i],
           totalPlayers,
+          i,
           mainPlayer: true,
         ));
       else
-        _allPlayers.add(Player(playerNames[i], totalPlayers));
+        _allPlayers.add(Player(playerNames[i], totalPlayers, i));
     }
     setValueNotifier();
   }
@@ -456,17 +482,7 @@ class PlayerManager {
 
   void setAllPlayersValues(List<List<shareCard.Card>> playerCards,
       List<List<shareCard.Card>> processedPlayerCards) {
-    for (int i = 0; i < _allPlayers.length; i++) {
-      setPlayerAllCards(playerCards[i], i);
-      _allPlayers[i].setCardPrice();
-      for (int j = 0; j < _allPlayers[i].totalTradedCards.length; j++)
-        _allPlayers[i].totalTradedCards[j] = 0;
-      _allPlayers[i].totalBoughtCards = 0;
-    }
-  }
-
-  void setPlayerAllCards(List<shareCard.Card> cards, int playerIndex) {
-    _allPlayers[playerIndex].setAllCards(cards);
+    _allPlayers.setNewCards(playerCards, processedPlayerCards);
   }
 
   ///returns -1 in case of name doesn't exist.

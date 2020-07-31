@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:stockexchange/backend_files/card_data.dart' as shareCard;
+import 'package:stockexchange/backend_files/player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:stockexchange/backend_files/backend_files.dart';
@@ -132,28 +133,43 @@ class Transaction {
 
   static Future<void> startNextRound() async {
     var playerRefs = Network.allPlayersFullDataRefs;
-    await firestore.runTransaction((transaction) async {
-      log("stariting next round", name: "startNextOnlineRound");
-      List<DocumentSnapshot> documents = [];
-      for (var ref in playerRefs) documents.add(await transaction.get(ref));
-      await Status.send(LoadingStatus.calculationStarted);
-      List<Player> allPlayers = Player.allFullPlayersFromMap(
-          Network.getAllDataFromDocuments(documents));
-      List<shareCard.Card> allCards = getAllCards(allPlayers);
-      List<Company> tempCompanies = calcSharePrice(allCards, companies);
-      await Status.send(LoadingStatus.calculationCompleted);
-      await transaction.update(Network.companiesDataDocRef, {
-        'companies': Company.allCompaniesToMap(tempCompanies),
-      });
-      await Status.send(LoadingStatus.startingNextRound);
-      await transaction.set(
-          firestore.document('${Network.roomName}/$playersTurnsDocName'), {
-        'turns': 0,
-      });
-      for (var ref in playerRefs) await transaction.update(ref, {});
-      await transaction.set(
-          firestore.document('${Network.roomName}/$loadingStatusDocName'),
-          Status(LoadingStatus.startedNextRound).toMap());
+    await firestore.runTransaction(
+      (transaction) async {
+        log("stariting next round", name: "startNextOnlineRound");
+        List<DocumentSnapshot> documents = [];
+        for (var ref in playerRefs) documents.add(await transaction.get(ref));
+        await Status.send(LoadingStatus.calculationStarted);
+        List<Player> allPlayers = Player.allFullPlayersFromMap(
+            Network.getAllDataFromDocuments(documents));
+        List<shareCard.Card> allCards = getAllCards(allPlayers);
+        List<Company> tempCompanies = calcSharePrice(allCards, companies);
+        cardBank.generateAllCards();
+        log('generated cards', name: 'startNextRound');
+        allPlayers.setNewCards(cardBank.getEachPlayerCards(),
+            cardBank.getEachPlayerProcessedCards());
+        log('setted new cards', name: 'startNextRound');
+        await Status.send(LoadingStatus.calculationCompleted);
+        await transaction.update(Network.companiesDataDocRef, {
+          'companies': Company.allCompaniesToMap(tempCompanies),
+        });
+        await Status.send(LoadingStatus.startingNextRound);
+        await transaction.set(
+            firestore.document('${Network.roomName}/$playersTurnsDocName'), {
+          'turns': 0,
+        });
+        for (int i = 0; i < playerRefs.length; i++) {
+          var ref = playerRefs[i];
+          allPlayers[i].incrementPlayerTurn();
+          await transaction.update(ref, allPlayers[i].toFullDataMap());
+        }
+      },
+      timeout: Duration(seconds: 10),
+    ).then((_) {
+      log('completed transaction', name: 'startNextRound');
+      Status.send(LoadingStatus.startedNextRound);
+    }).catchError((err) async {
+      await Status.send(LoadingStatus.nextRoundError);
+      throw err;
     });
   }
 }

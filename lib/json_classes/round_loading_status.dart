@@ -16,6 +16,8 @@ class Status {
 
   String toString() {
     switch (status) {
+      case LoadingStatus.nextRoundError:
+        return 'Some Error occured';
       case LoadingStatus.gettingData:
         return 'Getting Data';
       case LoadingStatus.calculationStarted:
