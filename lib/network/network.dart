@@ -115,7 +115,7 @@ class Network {
   }
 
   static Future<void> resetPlayerTurns() async {
-    await createDocument(playersTurnDocumentName, {
+    await createDocument(playersTurnsDocName, {
       "turns": 0,
     });
   }

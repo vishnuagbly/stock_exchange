@@ -190,7 +190,7 @@ class CardBank {
 
   List<Company> updateCompanyPrices() {
     for (int i = 0; i < allCompanies.length; i++)
-      allCompanies[i].setCurrenSharePrice(_processedCards[i].shareValueChange);
+      allCompanies[i].setCurrentSharePrice(_processedCards[i].shareValueChange);
     return allCompanies;
   }
 }

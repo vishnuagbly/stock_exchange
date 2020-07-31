@@ -47,7 +47,7 @@ class Company {
     return _allSharePrice;
   }
 
-  void setCurrenSharePrice(int value) {
+  void setCurrentSharePrice(int value) {
     _currentSharePrice += value;
     if (_currentSharePrice < 0) _currentSharePrice = 0;
     _allSharePrice.add(_currentSharePrice);

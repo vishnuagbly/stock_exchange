@@ -41,7 +41,6 @@ class CompletingRound extends Alert {
               Status statusObj = Status.fromMap(statusMap);
               if(statusObj.status == LoadingStatus.startedNextRound){
                 startNextRound();
-                playerManager.incrementPlayerTurn();
                 Network.updateAllMainPlayerData();
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   // ignore: invalid_use_of_protected_member

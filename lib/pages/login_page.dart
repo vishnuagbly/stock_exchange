@@ -15,8 +15,11 @@ import 'package:stockexchange/pages/enter_otp.dart';
 class LoginPage extends StatelessWidget {
   final _auth = FirebaseAuth.instance;
 
-  static final controller = StreamController<PlatformException>(sync: true);
-  static final Stream<PlatformException> stream = controller.stream;
+  static final controller = StreamController<PlatformException>(
+    sync: true,
+  );
+  static final Stream<PlatformException> stream =
+      controller.stream.asBroadcastStream();
 
   @override
   Widget build(BuildContext context) {
@@ -55,65 +58,80 @@ class LoginPage extends StatelessWidget {
                 await showDialog(
                   barrierDismissible: false,
                   context: context,
-                  builder: (context) => StreamBuilder<PlatformException>(
-                    stream: stream,
-                    builder: (context, snapshot) {
-                      print('recieverd something: ${snapshot.data.toString()}');
-                      if (snapshot.hasData) {
-                        if (snapshot.data.code == 'Code Sent') {
-                          return CommonAlertDialog('Code Sent', onPressed: () {
-                            controller.add(
-                                PlatformException(code: 'Waiting for code'));
-                          });
+                  builder: (context) {
+                    return StreamBuilder<PlatformException>(
+                      stream: stream,
+                      builder: (context, snapshot) {
+                        print(
+                            'recieverd something: ${snapshot.data.toString()}');
+                        if (snapshot.hasData) {
+                          if (snapshot.data.code == 'Code Sent') {
+                            return CommonAlertDialog('Code Sent',
+                                onPressed: () {
+                              controller.add(
+                                  PlatformException(code: 'Waiting for code'));
+                            });
+                          }
+                          if (snapshot.data.code == 'Waiting for code') {
+                            return LoadingDialog('Waiting for Code...');
+                          }
+                          if (snapshot.data.code == 'Got code') {
+                            WidgetsBinding.instance.addPostFrameCallback((_){
+                              controller.close();
+                              if (roomCreator) {
+                                Navigator.popAndPushNamed(
+                                    context, kCreateOnlineRoomName);
+                              } else
+                                Navigator.popAndPushNamed(
+                                    context, "/join_room");
+                            });
+                            return CommonAlertDialog('OTP Recieved');
+                          }
+                          if (snapshot.data.code == 'verification_failed') {
+                            return CommonAlertDialog(
+                              'Verification Failed',
+                              icon: Icon(
+                                Icons.block,
+                                color: Colors.red,
+                              ),
+                            );
+                          }
+                          if (snapshot.data.code == 'timed out') {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              Navigator.pop(context);
+                              controller.close();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      EnterOTP(snapshot.data.message),
+                                ),
+                              );
+                            });
+                          } else {
+                            return CommonAlertDialog(
+                              'Some Error Occured',
+                              icon: Icon(
+                                Icons.block,
+                                color: Colors.red,
+                              ),
+                            );
+                          }
                         }
-                        if (snapshot.data.code == 'Waiting for code') {
-                          return LoadingDialog('Waiting for Code...');
-                        }
-                        if (snapshot.data.code == 'Got code') {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (roomCreator) {
-                              Navigator.popAndPushNamed(context, kCreateOnlineRoomName);
-                            } else
-                              Navigator.popAndPushNamed(context, "/join_room");
-                          });
-                          return CommonAlertDialog('OTP Recieved');
-                        }
-                        if (snapshot.data.code == 'verification_failed') {
+                        if (snapshot.hasError) {
                           return CommonAlertDialog(
-                            'Verification Failed',
+                            'Some Error Occured',
                             icon: Icon(
                               Icons.block,
                               color: Colors.red,
                             ),
                           );
                         }
-                        if (snapshot.data.code == 'timed out') {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    EnterOTP(snapshot.data.message),
-                              ),
-                            );
-                          });
-                        }
-                      }
-                      if (snapshot.hasError) {
-                        return CommonAlertDialog(
-                          'Some Error Occured',
-                          icon: Icon(
-                            Icons.block,
-                            color: Colors.red,
-                          ),
-                        );
-                      }
-                      return LoadingDialog('Sending Code...');
-                    },
-                  ),
+                        return LoadingDialog('Sending Code...');
+                      },
+                    );
+                  },
                 );
-                await controller.close();
               }
             },
           ),

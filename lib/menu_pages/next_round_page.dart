@@ -67,8 +67,9 @@ class NextRoundPage extends StatelessWidget {
 Future<void> onlineNext() async {
   if (!playerManager.lastTurn()) {
     PlayerTurn playerTurn = PlayerTurn.next();
-    await Network.updateData(playersTurnDocumentName, playerTurn.toMap());
+    await Network.updateData(playersTurnsDocName, playerTurn.toMap());
     return;
   }
+  await sendRoundCompleteAlert();
   Transaction.startNextRound();
 }

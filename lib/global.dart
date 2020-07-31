@@ -86,7 +86,7 @@ double screenHeight, screenWidth;
 
 ///Streams
 final playerTurnStream = Network.firestore
-    .document("${Network.roomName}/$playersTurnDocumentName")
+    .document("${Network.roomName}/$playersTurnsDocName")
     .snapshots();
 
 final playerTurnSubscription = playerTurnStream.listen((playerTurnDocument) {
@@ -154,7 +154,7 @@ final String playersFullDataDocumentName = "Players_full_data";
 String get playerFullDataCollectionPath =>
     "$roomDataDocumentName/$playersFullDataDocumentName";
 
-final String playersTurnDocumentName = "players_turn";
+final String playersTurnsDocName = "players_turn";
 
 ///Alert Dialog Constants
 const kAlertDialogBackgroundColorCode = 0xFF202020;

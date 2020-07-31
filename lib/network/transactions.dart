@@ -131,7 +131,6 @@ class Transaction {
   }
 
   static Future<void> startNextRound() async {
-    sendRoundCompleteAlert();
     var playerRefs = Network.allPlayersFullDataRefs;
     await firestore.runTransaction((transaction) async {
       log("stariting next round", name: "startNextOnlineRound");
@@ -141,21 +140,25 @@ class Transaction {
       List<Player> allPlayers = Player.allFullPlayersFromMap(
           Network.getAllDataFromDocuments(documents));
       List<shareCard.Card> allCards = getAllCards(allPlayers);
-      await calcAndUploadSharePrices(allCards);
+      List<Company> tempCompanies = calcSharePrice(allCards, companies);
+      await Status.send(LoadingStatus.calculationCompleted);
       await transaction.update(Network.companiesDataDocRef, {
-        'companies': Company.allCompaniesToMap(companies),
+        'companies': Company.allCompaniesToMap(tempCompanies),
       });
       await Status.send(LoadingStatus.startingNextRound);
       await transaction.set(
-          firestore.document('${Network.roomName}/$playersTurnDocumentName'), {
+          firestore.document('${Network.roomName}/$playersTurnsDocName'), {
         'turns': 0,
       });
       for (var ref in playerRefs) await transaction.update(ref, {});
-    }).then((_) async => await Status.send(LoadingStatus.startedNextRound));
+      await transaction.set(
+          firestore.document('${Network.roomName}/$loadingStatusDocName'),
+          Status(LoadingStatus.startedNextRound).toMap());
+    });
   }
 }
 
-void sendRoundCompleteAlert() async {
+Future<void> sendRoundCompleteAlert() async {
   log("sending roundLoadingStatus", name: "setRoundCompleteAlert");
   await Status.send(LoadingStatus.gettingData);
   log("creating completingRound object", name: "setRoundCompleteAlert");
@@ -183,12 +186,14 @@ List<shareCard.Card> getAllCards(List<Player> allPlayers) {
   return allCards;
 }
 
-Future<void> calcAndUploadSharePrices(List<shareCard.Card> allCards) async {
-  await Status.send(LoadingStatus.calculationCompleted);
+List<Company> calcSharePrice(
+    List<shareCard.Card> allCards, List<Company> allCompanies) {
+  log('starting calculating card shares price', name: 'calcSharePrice');
   List<int> shareValues = [];
-  for (int i = 0; i < companies.length; i++) shareValues.add(0);
+  for (int i = 0; i < allCompanies.length; i++) shareValues.add(0);
   for (shareCard.Card card in allCards)
     shareValues[card.companyNum] += card.shareValueChange;
-  for (int i = 0; i < companies.length; i++)
-    companies[i].setCurrenSharePrice(shareValues[i]);
+  for (int i = 0; i < allCompanies.length; i++)
+    allCompanies[i].setCurrentSharePrice(shareValues[i]);
+  return allCompanies;
 }
