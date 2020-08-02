@@ -31,10 +31,17 @@ dependencies:
   cloud_firestore: ^0.13.5
   shared_preferences: ^0.5.7+1
   flutter_tex: ^3.6.7+4
+  flutter_launcher_icons: ^0.7.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter_icons:
+  ios: true
+  android: true
+  image_path_ios: images/icon.png
+  image_path_android: images/icon.png
 
 
 # For information on the generic Dart part of this file, see the
