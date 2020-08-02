@@ -301,8 +301,8 @@ class Player {
       shares = this.shares[companyIndex];
     }
     if (companies[companyIndex].getCurrentSharePrice() == 0) {
-      log(
-          "Error:Cannot sell shares as company[$companyIndex] is bankrupt for now", name: 'sellShares');
+      log("Error:Cannot sell shares as company[$companyIndex] is bankrupt for now",
+          name: 'sellShares');
       return;
     }
     companies[companyIndex].leftShares += shares;
@@ -313,8 +313,8 @@ class Player {
 
   void buyShares(int companyIndex, int shares) {
     if (companyIndex < 0 || companyIndex >= companies.length) {
-      log(
-          "Error: company[$companyIndex] doesn't exists transaction doesn't performed", name: 'buyShares');
+      log("Error: company[$companyIndex] doesn't exists transaction doesn't performed",
+          name: 'buyShares');
       return;
     }
     if (companies[companyIndex].leftShares < shares) {
@@ -322,12 +322,13 @@ class Player {
       shares = companies[companyIndex].leftShares;
     }
     if (companies[companyIndex].getCurrentSharePrice() == 0) {
-      log("Error: company[$companyIndex] is bankrupt for now", name: 'buyShares');
+      log("Error: company[$companyIndex] is bankrupt for now",
+          name: 'buyShares');
       return;
     }
     if (_money < shares * companies[companyIndex].getCurrentSharePrice()) {
-      log(
-          "Error: not enough money money: $_money needed: ${shares * companies[companyIndex].getCurrentSharePrice()}", name: 'buyShares');
+      log("Error: not enough money money: $_money needed: ${shares * companies[companyIndex].getCurrentSharePrice()}",
+          name: 'buyShares');
       shares = _money ~/ companies[companyIndex].getCurrentSharePrice();
     }
     _money -= (shares * companies[companyIndex].getCurrentSharePrice()).toInt();
@@ -339,14 +340,12 @@ class Player {
   ///Returns true if trade accepted.
   bool tradeRequest(TradeDetails tradeDetails) {
     if (!mainPlayer) {
-      if (tradeDetails.cardsRequested == tradeDetails.cardsOffered) return true;
-      if (tradeDetails.moneyRequested ==
-          tradeDetails.moneyOffered) if (tradeDetails
-              .cardsOffered >=
-          tradeDetails.cardsOffered)
-        return true;
-      else
-        return false;
+      if (tradeDetails.moneyRequested <= tradeDetails.moneyOffered) {
+        if (tradeDetails.cardsOffered >= tradeDetails.cardsRequested)
+          return true;
+        else
+          return false;
+      }
       if ((tradeDetails.moneyOffered - tradeDetails.moneyRequested) /
               (tradeDetails.cardsRequested - tradeDetails.cardsOffered) >
           1000) {
@@ -363,7 +362,7 @@ class Player {
   void makeHalfTrade(TradeDetails tradeDetails, Player player) {
     log('making half trade', name: 'Player.halfTrade');
     log('checking if trade possible', name: 'Player.halfTrade');
-    tradeDetails.checkIfTradePossible(this, player);
+    tradeDetails.checkIfTradePossible(player, this);
     log('trade possible', name: 'Player.halfTrade');
     _money += tradeDetails.moneyOffered - tradeDetails.moneyRequested;
     if (mainPlayer) balance.value = money;
@@ -461,7 +460,8 @@ class PlayerManager {
 
   void generatePlayers(List<String> playerNames) {
     if (playerNames.length != totalPlayers) {
-      log("Error: playerNames String is not equal to totalPLayers", name: 'generatePlayers');
+      log("Error: playerNames String is not equal to totalPLayers",
+          name: 'generatePlayers');
       int i = 1;
       while (playerNames.length < totalPlayers)
         playerNames.add("Player ${i++}");
@@ -531,25 +531,15 @@ class PlayerManager {
         requestedPlayerIndex >= _allPlayers.length) {
       throw "Error: trade requseted player doesn't exist, trade doesn't performed";
     }
-    if (_allPlayers[requestingPlayerIndex].money < tradeDetails.moneyOffered) {
-      throw "Error: money offered more than you have, trade does not performed";
-    }
-    if (_allPlayers[requestedPlayerIndex].money < tradeDetails.moneyRequested) {
-      throw "Error: money Requested more than player can offer, trade does not performed";
-    }
     if (_allPlayers[requestedPlayerIndex].tradeRequest(tradeDetails)) {
-      try {
-        _allPlayers[requestingPlayerIndex].makeHalfTrade(
-          tradeDetails.detailsForRequestingPlayer,
-          _allPlayers[requestedPlayerIndex],
-        );
-        _allPlayers[requestedPlayerIndex].makeHalfTrade(
-          tradeDetails.detailsForRequestedPlayer,
-          _allPlayers[requestingPlayerIndex],
-        );
-      } catch (e) {
-        throw e;
-      }
+      _allPlayers[requestingPlayerIndex].makeHalfTrade(
+        tradeDetails.detailsForRequestingPlayer,
+        _allPlayers[requestedPlayerIndex],
+      );
+      _allPlayers[requestedPlayerIndex].makeHalfTrade(
+        tradeDetails.detailsForRequestedPlayer,
+        _allPlayers[requestingPlayerIndex],
+      );
       return true;
     }
     return false;

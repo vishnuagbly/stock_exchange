@@ -136,8 +136,8 @@ class TradePage extends StatelessWidget {
         await playerManager.tradeProcessOnline(tradeDetails);
     } catch (error) {
       specs.errorText.length = specs.inputTextControllers.length;
-      specs.showError(specs.errorText);
       tradeSuccessFull = false;
+      log(error.toString(), name: makeTrade.toString());
       throw error;
     }
     return tradeSuccessFull;

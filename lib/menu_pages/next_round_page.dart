@@ -29,14 +29,15 @@ class NextRoundPage extends StatelessWidget {
                     RaisedButton(
                         child: Text("YES"),
                         onPressed: () async {
-                          if (playerManager.lastTurn())
+                          if (playerManager.lastTurn() || !online)
                             log("pressed yes moving to next round", name: 'nextRoundPage');
                           else
                             log("pressed yes moving to next turn", name: 'nextRoundPage');
                           currentPage.value = StockPage.home;
-                          if (!online)
+                          if (!online) {
+                            startNextRound();
                             cardBank.updateCompanyPrices();
-                          else
+                          } else {
                             showDialog(
                               barrierDismissible: false,
                               context: context,
@@ -44,6 +45,7 @@ class NextRoundPage extends StatelessWidget {
                                 future: onlineNext(),
                               ),
                             );
+                          }
                         }),
                     SizedBox(
                       width: 10,

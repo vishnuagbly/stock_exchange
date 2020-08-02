@@ -26,10 +26,10 @@ class TradeDetails {
         this.playerRequesting = map["playerRequesting"];
 
   Map<String, dynamic> toMap() => {
-    "values": [cardsOffered, moneyOffered, cardsRequested, moneyRequested],
-    "playerRequested": playerRequested,
-    "playerRequesting": playerRequesting,
-  };
+        "values": [cardsOffered, moneyOffered, cardsRequested, moneyRequested],
+        "playerRequested": playerRequested,
+        "playerRequesting": playerRequesting,
+      };
 
   TradeDetails reverse() {
     List<int> values = [
@@ -42,6 +42,7 @@ class TradeDetails {
   }
 
   TradeDetails get detailsForRequestingPlayer => reverse();
+
   TradeDetails get detailsForRequestedPlayer => this;
 
   void checkIfTradePossible(Player requester, Player requested) {
@@ -50,8 +51,13 @@ class TradeDetails {
     log('trade details: ${toMap()}', name: 'checkIfTradePossible');
     if (this.moneyOffered > requester.money)
       throw 'Not have enough money from trade requester';
-    if (this.moneyRequested > requested.money)
+    if (this.moneyRequested > requested.money) {
+      log(
+        'money requested: $moneyRequested, money requseted has: ${requested.money}',
+        name: checkIfTradePossible.toString(),
+      );
       throw 'requested person does not have enough money';
+    }
     if (!checkIfTradingOfCardsPossible(
       cardsProvider: requester,
       cardsAcceptor: requested,
@@ -110,8 +116,8 @@ bool checkIfTradingOfCardsPossible({
       providerIndex != null &&
       providerIndex != null);
   if (cardsProvider.getAllCardsLength() -
-      cardsProvider.totalTradedCards[acceptorIndex] -
-      cardsAcceptor.totalTradedCards[providerIndex] <
+          cardsProvider.totalTradedCards[acceptorIndex] -
+          cardsAcceptor.totalTradedCards[providerIndex] <
       numOfCards) return false;
   if (numOfCards < 0) return false;
   return true;
