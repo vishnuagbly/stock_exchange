@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:stockexchange/components/input_board.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,17 +28,17 @@ class EnterOTP extends StatelessWidget {
             sliverListType: false,
             totalTextFields: 1,
             onPressedButton: (specs) {
-              print("verification id: $_verificationId");
-              print("entered value: ${specs.inputTextControllers[0].text}");
+              log("verification id: $_verificationId", name: 'enterOTP');
+              log("entered value: ${specs.inputTextControllers[0].text}", name: 'enterOTP');
               AuthCredential authCredential = PhoneAuthProvider.getCredential(
                 verificationId: _verificationId,
                 smsCode: specs.inputTextControllers[0].text,
               );
-              print("AuthCredential: " + authCredential.toString());
+              log("AuthCredential: " + authCredential.toString(), name: 'enterOTP');
               _auth.signInWithCredential(authCredential).then((authResult) {
                 if (authResult.user != null) {
                   print("<-----------authentication successfull----------->");
-                  print("UUID: ${authResult.user.uid}");
+                  log("UUID: ${authResult.user.uid}", name: 'enterOTP');
                   Network.setAuthId(authResult.user.uid);
                   if(roomCreator){
                     Navigator.pushNamed(context, kCreateOnlineRoomName);
@@ -45,7 +47,7 @@ class EnterOTP extends StatelessWidget {
                     Navigator.pushNamed(context, "/join_room");
                 } else
                   specs.showError(["Wrong OTP"]);
-              }).catchError((error) => print(error));
+              }).catchError((error) => log(error, name: 'enterOTP'));
             },
           ),
         ),

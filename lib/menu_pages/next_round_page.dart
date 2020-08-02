@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:stockexchange/components/dialogs/future_dialog.dart';
 import 'package:stockexchange/global.dart';
@@ -28,9 +30,9 @@ class NextRoundPage extends StatelessWidget {
                         child: Text("YES"),
                         onPressed: () async {
                           if (playerManager.lastTurn())
-                            print("pressed yes moving to next round");
+                            log("pressed yes moving to next round", name: 'nextRoundPage');
                           else
-                            print("pressed yes moving to next turn");
+                            log("pressed yes moving to next turn", name: 'nextRoundPage');
                           currentPage.value = StockPage.home;
                           if (!online)
                             cardBank.updateCompanyPrices();
@@ -49,7 +51,7 @@ class NextRoundPage extends StatelessWidget {
                     RaisedButton(
                       child: Text("NO"),
                       onPressed: () {
-                        print("pressed no");
+                        log("pressed no", name: 'nextRoundPage');
                         currentPage.value = StockPage.home;
                       },
                     ),

@@ -8,17 +8,18 @@ import 'package:stockexchange/json_classes/json_classes.dart';
 
 StreamController<Alert> alertsController = StreamController();
 
-void checkAndShowAlert(BuildContext context) {
+StreamSubscription<QuerySnapshot> checkAndShowAlert() {
   log("reahed checkAndShowAlert", name: "checkAndShowAlert");
-  showAlerts(context);
-  log("afterShowAlerts", name: "checkAndShowAlert");
   Stream<QuerySnapshot> stream =
       Network.getCollectionStream("${Network.alertCollectionPath}");
-  stream.listen((QuerySnapshot snapshot) async {
+  var alertSubscription = stream.listen((QuerySnapshot snapshot) async {
+    log('listened something from alerts document', name: 'checkAndShowAlert');
     List<DocumentSnapshot> allDocuments = snapshot.documents;
     List<Map<String, dynamic>> allAlertMaps = [];
-    for (DocumentSnapshot document in allDocuments)
+    for (DocumentSnapshot document in allDocuments) {
       allAlertMaps.add(document.data);
+      log('adding alert: ${document.data}', name: 'checkAndShowAlert');
+    }
     if (allAlertMaps.length > 0) {
       log("got something", name: "checkAndShowAlert");
       await Network.deleteAllDocuments(Network.alertCollectionPath);
@@ -26,6 +27,7 @@ void checkAndShowAlert(BuildContext context) {
     }
   });
   log("leaving", name: "checkAndShowAlert");
+  return alertSubscription;
 }
 
 void showAlerts(BuildContext context) async {

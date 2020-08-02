@@ -23,7 +23,7 @@ class JoinRoom extends StatelessWidget {
               inputText: ["Room Name"],
               inputType: [TextInputType.text],
               onPressedButton: (specs) {
-                Network.roomName = specs.inputTextControllers[0].text;
+                Network.setRoomName(specs.inputTextControllers[0].text);
                 Navigator.push(
                   context,
                   MaterialPageRoute(

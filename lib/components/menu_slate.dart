@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:stockexchange/global.dart';
 
@@ -64,9 +66,9 @@ class MenuSlate extends StatelessWidget {
               ignoring: currentPage.value == StockPage.start || !getSelected,
               child: GestureDetector(
                 onTap: () {
-                  print("tapped $page from menuOpt");
+                  log("tapped $page from menuOpt", name: 'MenuSlate');
                   currentPage.value = page;
-                  print("currentPage value changed to ${currentPage.value}");
+                  log("currentPage value changed to ${currentPage.value}", name: 'MenuSlate');
                 },
                 child: Container(
                   decoration: BoxDecoration(

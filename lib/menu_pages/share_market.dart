@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:stockexchange/components/components.dart';
 import 'package:stockexchange/components/dialogs/future_dialog.dart';
@@ -187,8 +189,8 @@ class ShareMarket {
     Company selectedCompany = getCompany(selectedCompanyName);
     List<int> inputLimits = buySellPageInputLimits(selectedCompany, sell);
     List<int> inputValues = specs.getAllTextFieldIntValues();
-    print("inputValues: $inputValues");
-    print("inputLimits: $inputLimits");
+    log("inputValues: $inputValues", name: checkBuySellInputLimitsAndTakeAction.toString());
+    log("inputLimits: $inputLimits", name: checkBuySellInputLimitsAndTakeAction.toString());
     for (int i = 0; i < inputLimits.length; i++) {
       if ((inputValues[i] ?? 0) > inputLimits[i]) {
         specs.inputTextControllers[i].text = inputLimits[i].toString();
@@ -225,11 +227,11 @@ class ShareMarket {
     String companyName = specs.dropDownValue;
     Company tempCompany = getCompany(companyName);
     double sharePrice = tempCompany.getCurrentSharePrice();
-    print("Company: ${tempCompany.name}");
-    print("share price: ${tempCompany.getCurrentSharePrice()}");
+    log("Company: ${tempCompany.name}", name: 'share_market');
+    log("share price: ${tempCompany.getCurrentSharePrice()}", name: 'share_market');
     List<int> inputValues = specs.getAllTextFieldIntValues();
-    print("inputValues: $inputValues");
-    print("changing other textField value");
+    log("inputValues: $inputValues", name: 'share_market');
+    log("changing other textField value", name: 'share_market');
     if (invert) {
       inputs[0].text = (inputValues[1] ~/ sharePrice).toString();
       if (submitted) {

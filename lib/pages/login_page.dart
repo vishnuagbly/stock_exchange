@@ -62,8 +62,8 @@ class LoginPage extends StatelessWidget {
                     return StreamBuilder<PlatformException>(
                       stream: stream,
                       builder: (context, snapshot) {
-                        print(
-                            'recieverd something: ${snapshot.data.toString()}');
+                        log(
+                            'recieverd something: ${snapshot.data.toString()}', name: 'loginPage');
                         if (snapshot.hasData) {
                           if (snapshot.data.code == 'Code Sent') {
                             return CommonAlertDialog('Code Sent',
@@ -162,17 +162,17 @@ class LoginPage extends StatelessWidget {
     _auth.signInWithCredential(authCredential).then((authResult) {
       if (authResult.user != null) {
         print("<-----------authentication successfull----------->");
-        print("UUID: ${authResult.user.uid}");
+        log("UUID: ${authResult.user.uid}", name: 'loginPage');
         Network.setAuthId(authResult.user.uid);
         controller.add(PlatformException(code: 'Got code'));
       } else
-        print("Wrong Error");
-    }).catchError((error) => print(error));
+        log("Wrong Error", name: 'loginPage');
+    }).catchError((error) => log(error, name: 'loginPage->autoRetrieval'));
   }
 
   void _verificationFailed(context, AuthException authException) {
-    print("ERROR message: ${authException.message}");
-    print("ERROR CODE: ${authException.code}");
+    log("ERROR message: ${authException.message}", name: 'loginPage->verificationFailed');
+    log("ERROR CODE: ${authException.code}", name: 'loginPage->verificationFailed');
     controller.add(PlatformException(code: 'verification_failed'));
   }
 

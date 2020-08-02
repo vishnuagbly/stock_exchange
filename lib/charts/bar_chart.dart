@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:stockexchange/global.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
@@ -21,10 +23,10 @@ class BarChartData {
 
   static List<Map<String, dynamic>> allToMap(List<BarChartData> allBarChartData){
     List<Map<String, dynamic>> result = [];
-    print("mapping allBarChartData");
+    log("mapping allBarChartData", name: allToMap.toString());
     for(BarChartData barChartData in allBarChartData)
       result.add(barChartData.toMap());
-    print("mapping allBarChartData done");
+    log("mapping allBarChartData done", name: allToMap.toString());
     return result;
   }
 

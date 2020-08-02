@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/backend_files/card_data.dart' as shareCard;
@@ -24,37 +26,39 @@ class ShareCard extends StatelessWidget {
                 children: <Widget>[
                   (card.traded ?? false) || (card.bought ?? false)
                       ? Row(
-                        children: <Widget>[
-                          Text(
-                            (card.bought ?? false) ? "BOUGHT": "",
-                            style: TextStyle(
-                              color: Colors.redAccent,
-                              fontWeight: FontWeight.bold,
-                              fontSize: screenWidth * 0.03,
+                          children: <Widget>[
+                            Text(
+                              (card.bought ?? false) ? "BOUGHT" : "",
+                              style: TextStyle(
+                                color: Colors.redAccent,
+                                fontWeight: FontWeight.bold,
+                                fontSize: screenWidth * 0.03,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 10),
-                          Text(
-                            (card.traded ?? false) ? "TRADED" : "",
+                            SizedBox(width: 10),
+                            Text(
+                              (card.traded ?? false) ? "TRADED" : "",
                               style: TextStyle(
                                 color: Colors.greenAccent,
                                 fontWeight: FontWeight.bold,
                                 fontSize: screenWidth * 0.03,
                               ),
                             ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                        ],
-                      )
+                            SizedBox(
+                              width: 10,
+                            ),
+                          ],
+                        )
                       : SizedBox(),
                   hero
                       ? Padding(
                           padding: EdgeInsets.only(right: 5.0),
                           child: GestureDetector(
                             onTap: () {
-                              print(
-                                  "double tapped on ${companies[card.companyNum].name}");
+                              log(
+                                "tapped on ${companies[card.companyNum].name}",
+                                name: 'cardWidget',
+                              );
                               pageCompany = companies[card.companyNum];
                               Navigator.of(context).pushNamed("/company_page");
                             },
@@ -78,7 +82,10 @@ class ShareCard extends StatelessWidget {
               Center(
                 child: GestureDetector(
                   onTap: () {
-                    print("double tapped on ${companies[card.companyNum].name}");
+                    log(
+                      "tapped on ${companies[card.companyNum].name}",
+                      name: 'cardWidget',
+                    );
                     if (hero) {
                       pageCompany = companies[card.companyNum];
                       Navigator.of(context).pushNamed("/company_page");

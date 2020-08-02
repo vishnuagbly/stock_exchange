@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:stockexchange/components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:stockexchange/global.dart';
@@ -13,6 +15,21 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool runCheckAlert = true;
 
+
+  @override
+  void dispose() {
+    Network.alertDocSubscription.cancel();
+    super.dispose();
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    showAlerts(context);
+    log("afterShowAlerts", name: "checkAndShowAlert");
+  }
+
   @override
   Widget build(BuildContext context) {
     homePageState = this;
@@ -23,10 +40,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } else {
       screenWidth = screen.size.height;
       screenHeight = screen.size.width;
-    }
-    if (runCheckAlert && Network.roomName != "null") {
-      checkAndShowAlert(context);
-      runCheckAlert = false;
     }
     return Container(
       decoration: BoxDecoration(
@@ -62,10 +75,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   } else if (value == StockPage.cards) {
                     return ProcessedCardsPage();
                   } else if (value == StockPage.buy) {
-                    print("changing to StockPage.buy");
+                    log("changing to StockPage.buy", name: 'homePage');
                     return ShareMarket.buyPage(context);
                   } else if (value == StockPage.sell) {
-                    print("changing to StockPage.sell");
+                    log("changing to StockPage.sell", name: 'homePage');
                     return ShareMarket.sellPage(context);
                   } else if (value == StockPage.trade) {
                     return TradePage();

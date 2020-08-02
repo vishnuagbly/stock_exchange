@@ -23,6 +23,7 @@ class Player {
   int _boughtCard = 0;
   int totalBoughtCards = 0;
   int _turn;
+
   int get turn => _turn;
   int _cardPrice;
   int _money;
@@ -43,7 +44,8 @@ class Player {
       totalTradedCards.add(0);
     }
     turn = newTurn;
-    print("totalTradedCards player[${this.name}]: $totalTradedCards");
+    log("totalTradedCards player[${this.name}]: $totalTradedCards",
+        name: 'Player');
   }
 
   Player.fromMap(Map<String, dynamic> map, int totalPlayers,
@@ -145,10 +147,10 @@ class Player {
 
   BarChartData totalAssets() {
     double totalAssets = _money.toDouble();
-    print("calculating totalAssets for $name");
+    log("calculating totalAssets for $name", name: 'Player->totalAssets');
     for (int i = 0; i < shares.length; i++)
       totalAssets += shares[i] * companies[i].getCurrentSharePrice();
-    print("total assets: $totalAssets");
+    log("total assets: $totalAssets", name: 'Player->totalAssets');
     return BarChartData(name, totalAssets);
   }
 
@@ -290,17 +292,17 @@ class Player {
 
   void sellShares(int companyIndex, int shares) {
     if (companyIndex < 0 || companyIndex >= companies.length) {
-      print(
-          "Error: company[$companyIndex] doesn't exists transaction doesn't performed");
+      log("Error: company[$companyIndex] doesn't exists transaction doesn't performed",
+          name: 'sellShares');
       return;
     }
     if (shares > this.shares[companyIndex]) {
-      print("Error: shares not enough bought");
+      log("Error: shares not enough bought", name: 'sellShares');
       shares = this.shares[companyIndex];
     }
     if (companies[companyIndex].getCurrentSharePrice() == 0) {
-      print(
-          "Error:Cannot sell shares as company[$companyIndex] is bankrupt for now");
+      log(
+          "Error:Cannot sell shares as company[$companyIndex] is bankrupt for now", name: 'sellShares');
       return;
     }
     companies[companyIndex].leftShares += shares;
@@ -311,21 +313,21 @@ class Player {
 
   void buyShares(int companyIndex, int shares) {
     if (companyIndex < 0 || companyIndex >= companies.length) {
-      print(
-          "Error: company[$companyIndex] doesn't exists transaction doesn't performed");
+      log(
+          "Error: company[$companyIndex] doesn't exists transaction doesn't performed", name: 'buyShares');
       return;
     }
     if (companies[companyIndex].leftShares < shares) {
-      print("Error: not enough shares left");
+      log("Error: not enough shares left", name: 'buyShares');
       shares = companies[companyIndex].leftShares;
     }
     if (companies[companyIndex].getCurrentSharePrice() == 0) {
-      print("Error: company[$companyIndex] is bankrupt for now");
+      log("Error: company[$companyIndex] is bankrupt for now", name: 'buyShares');
       return;
     }
     if (_money < shares * companies[companyIndex].getCurrentSharePrice()) {
-      print(
-          "Error: not enough money money: $_money needed: ${shares * companies[companyIndex].getCurrentSharePrice()}");
+      log(
+          "Error: not enough money money: $_money needed: ${shares * companies[companyIndex].getCurrentSharePrice()}", name: 'buyShares');
       shares = _money ~/ companies[companyIndex].getCurrentSharePrice();
     }
     _money -= (shares * companies[companyIndex].getCurrentSharePrice()).toInt();
@@ -443,6 +445,8 @@ class PlayerManager {
         mainPlayer.turn = i;
         _mainPlayerIndex = i;
         _allPlayers.add(mainPlayer);
+        if (player.turn != i) //if database does not have correct turn;
+          Network.updateAllMainPlayerData();
       }
       log("$i: ${_allPlayers[i].toMap().toString()}", name: logName);
     }
@@ -457,7 +461,7 @@ class PlayerManager {
 
   void generatePlayers(List<String> playerNames) {
     if (playerNames.length != totalPlayers) {
-      print("Error: playerNames String is not equal to totalPLayers");
+      log("Error: playerNames String is not equal to totalPLayers", name: 'generatePlayers');
       int i = 1;
       while (playerNames.length < totalPlayers)
         playerNames.add("Player ${i++}");

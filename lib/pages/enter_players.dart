@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:stockexchange/components/components.dart';
 import 'package:stockexchange/network/network.dart';
@@ -23,13 +25,13 @@ class EnterTotalPlayers extends StatelessWidget {
             inputOnChanged: [
               (specs) {
                 int totalPlayers = specs.getTextFieldIntValue(0);
-                print("total_players: $totalPlayers");
+                log("total_players: $totalPlayers", name: 'enter_players');
                 if (totalPlayers > 6 || totalPlayers <= 1) {
                   specs.inputTextControllers[0].text =
                       totalPlayers > 6 ? 6.toString() : "";
                   specs.setBoardState(() {
                     specs.errorText[0] = "Total players should be from 2 to 6";
-                    print(specs.errorText);
+                    log(specs.errorText.toString(), name: 'enter_players');
                   });
                 } else {
                   specs.errorText[0] = "";
@@ -45,12 +47,7 @@ class EnterTotalPlayers extends StatelessWidget {
               } else {
                 List<int> inputValue = [];
                 inputValue.addAll([0]);
-                try {
-                  inputValue[0] = int.parse(inputs[0].text);
-                } catch (e) {
-                  print(e);
-                  inputValue[0] = 0;
-                }
+                inputValue[0] = specs.getTextFieldIntValue(0);
                 startGame(inputValue[0]);
                 if (!online)
                   Navigator.popUntil(context, ModalRoute.withName("/"));
@@ -60,7 +57,7 @@ class EnterTotalPlayers extends StatelessWidget {
                     Navigator.pushNamed(context, kLoginPageName);
                   else {
                     specs.showInfo(["You are now online"]);
-                    print("uuid: $authId");
+                    log("uuid: $authId", name: 'enter_players');
                     Navigator.pushNamed(context, kCreateOnlineRoomName);
                   }
                 }

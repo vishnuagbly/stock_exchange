@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:stockexchange/backend_files/backend_files.dart';
 import 'package:stockexchange/components/dialogs/future_dialog.dart';
@@ -76,8 +78,8 @@ class TradePage extends StatelessWidget {
       ],
       onPressedButton: (specs) async {
         print("<------------------Pressed Trade Button------------------->");
-        print(
-            "total inputTextControllers: ${specs.inputTextControllers.length}");
+        log(
+            "total inputTextControllers: ${specs.inputTextControllers.length}", name: 'tradeButton');
         bool allFieldsEmpty =
             await specs.checkAndTakeActionIfAllFieldsAreEmpty(context);
         if (!allFieldsEmpty) {

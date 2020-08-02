@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -22,6 +24,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(mySystemTheme);
+    log("afterShowAlerts", name: "checkAndShowAlert");
     return MaterialApp(
       builder: (BuildContext context, Widget child) {
         final MediaQueryData data = MediaQuery.of(context);

@@ -161,6 +161,7 @@ class Transaction {
           var ref = playerRefs[i];
           allPlayers[i].incrementPlayerTurn();
           await transaction.update(ref, allPlayers[i].toFullDataMap());
+          log('player[${allPlayers[i].name} is updated', name: 'startNextRound');
         }
       },
     ).timeout(Duration(seconds: 7), onTimeout: () {

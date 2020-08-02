@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stockexchange/charts/bar_chart.dart';
+import 'package:stockexchange/components/check_and_show_alert.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/backend_files/player.dart';
 import 'package:stockexchange/backend_files/company.dart';
@@ -15,6 +17,7 @@ class Network {
   static final maths.Random rand = maths.Random();
   static final onlineMode = false;
   static String authId;
+  static StreamSubscription<QuerySnapshot> alertDocSubscription;
 
   static String get alertCollectionPath => "$alertDocumentName/$authId";
 
@@ -22,7 +25,15 @@ class Network {
 
   static Network get instance => Network();
 
-  static String roomName = "null";
+  static String _roomName = "null";
+  static String get roomName => _roomName;
+
+  static Future<void> setRoomName(String name) async {
+    _roomName = name;
+    if(alertDocSubscription != null)
+      await alertDocSubscription.cancel();
+    alertDocSubscription = checkAndShowAlert();
+  }
 
   static DocumentReference get mainPlayerFullDataDocRef =>
       playerFullDataRef(authId);
@@ -72,8 +83,10 @@ class Network {
   }
 
   static Future<String> getAuthId() async {
+    log('trying to get authId', name: 'getAuthId');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String uuid = prefs.getString('uuid');
+    log('got authId: $uuid', name: 'getAuthId');
     if (uuid != null) setAuthId(uuid);
     return uuid;
   }
@@ -85,9 +98,10 @@ class Network {
   }
 
   static Future<void> createRoomName() async {
-    roomName = playerManager.mainPlayerName + rand.nextInt(1000).toString();
+    String roomName = playerManager.mainPlayerName + rand.nextInt(1000).toString();
+    await setRoomName(roomName);
     if (await documentExists(roomDataDocumentName)) createRoomName();
-    print("room name: $roomName");
+    log("room name: $roomName", name: 'createRoomName');
   }
 
   static Future<void> createRoom() async {
@@ -154,7 +168,7 @@ class Network {
     } else {
       for (int i = 0; i < data.playerIds.length; i++)
         if (data.playerIds[i].uuid == authId) {
-          print(mainPlayerData);
+          log(mainPlayerData.toString(), name: 'joinRoom');
           playerManager.setMainPlayerValues(Player.fromFullMap(mainPlayerData));
           break outerIf;
         }
@@ -175,6 +189,7 @@ class Network {
         playerManager.mainPlayer().toMap());
   }
 
+  ///update all main player data online with data on device.
   static Future<void> updateAllMainPlayerData() async {
     if (roomName == "null") return;
     log("roomName: $roomName", name: "updateAllMainPlayerData");
@@ -271,11 +286,11 @@ class Network {
     try {
       document = await firestore.document("$gameDataPath/$documentName").get();
       if (document.data != null) {
-        print(document.data.toString());
+        log('got doc $documentName: ${document.data.toString()}', name: 'getDocument');
         setTimestamp();
       }
     } catch (error) {
-      print(error);
+      log(error.toString(), name: 'getDocument');
       document = null;
     }
     return document;
@@ -287,7 +302,7 @@ class Network {
       await firestore.document("$gameDataPath/$documentName").updateData(data);
       await setTimestamp();
     } catch (error) {
-      print(error);
+      log(error.toString(), name: 'updateData');
     }
   }
 
@@ -298,7 +313,7 @@ class Network {
           .setData(data, merge: true);
       setTimestamp();
     } catch (error) {
-      print(error);
+      log(error, name: 'setData');
     }
   }
 
@@ -322,21 +337,21 @@ class Network {
         await firestore.collection(gameDataPath).add(data);
       return Future.value(true);
     } catch (error) {
-      print(error);
+      log(error, name: 'createDocument');
       throw error;
     }
   }
 
   static Future<bool> documentExists(String documentPath,
       {printConsole: true}) async {
-    if (printConsole) print("checking if document exists");
+    if (printConsole) log("checking if document exists", name: 'documentExists');
     DocumentSnapshot snapshot =
         await firestore.document("$gameDataPath/$documentPath").get();
     if (snapshot == null || !snapshot.exists) {
-      if (printConsole) print("$gameDataPath/$documentPath does not exists");
+      if (printConsole) log("$gameDataPath/$documentPath does not exists", name: 'documentExists');
       return Future.value(false);
     }
-    if (printConsole) print("$gameDataPath/$documentPath exists");
+    if (printConsole) log("$gameDataPath/$documentPath exists", name: 'documentExists');
     return Future.value(true);
   }
 
@@ -352,6 +367,6 @@ class Network {
     await firestore
         .document("$gameDataPath/$documentPath")
         .delete()
-        .catchError((error) => print(error));
+        .catchError((error) => log(error, name: 'deleteDocument'));
   }
 }

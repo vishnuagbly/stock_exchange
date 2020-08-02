@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:stockexchange/global.dart';
 import 'buy_shares_button.dart';
@@ -55,7 +57,8 @@ class CompanySlates extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "$kRupeeChar" + currentCompany.getCurrentSharePrice().toString(),
+                        "$kRupeeChar" +
+                            currentCompany.getCurrentSharePrice().toString(),
                         style: kSlateSharePriceStyle,
                         textAlign: TextAlign.left,
                       ),
@@ -72,7 +75,10 @@ class CompanySlates extends StatelessWidget {
                 child: Container(
                   child: GestureDetector(
                     onTap: () {
-                      print("tapping on icon of " + currentCompany.name.toLowerCase());
+                      log(
+                        "tapping on icon of " + currentCompany.name.toLowerCase(),
+                        name: 'companySlates',
+                      );
                       pageCompany = currentCompany;
                       Navigator.of(context).pushNamed("/company_page");
                     },
@@ -81,7 +87,8 @@ class CompanySlates extends StatelessWidget {
                         padding: const EdgeInsets.all(10.0),
                         child: Hero(
                           tag: currentCompany.name.toLowerCase(),
-                          child: Image.asset("images/${currentCompany.name}.png"),
+                          child:
+                              Image.asset("images/${currentCompany.name}.png"),
                         ),
                       ),
                     ),

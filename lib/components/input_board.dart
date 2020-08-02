@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:stockexchange/global.dart';
 import 'file:///D:/FlutterProjects/stock_exchange/lib/components/dialogs/common_alert_dialog.dart';
@@ -30,7 +32,7 @@ class InputBoardSpecs {
       String text = inputTextControllers[index].text;
       result = text != '' ? int.parse(text) : null;
     } catch (error) {
-      print(error);
+      log('err: $error', name: getTextFieldIntValue.toString());
       result = 0;
       setBoardState(() {
         inputTextControllers[index].text = "";
@@ -57,7 +59,7 @@ class InputBoardSpecs {
   void checkAndTakeActionIfCompanyIsBankrupt(BuildContext context) {
     String companyName = dropDownValue;
     if (getCompany(companyName).getCurrentSharePrice().toInt() == 0) {
-      print("Company is Bankrupt");
+      log("Company is Bankrupt", name: checkAndTakeActionIfCompanyIsBankrupt.toString());
       errorText.length = inputTextControllers.length;
       setBoardState(() {
         errorText.last = "Company is Bankrupt";
@@ -181,7 +183,7 @@ class _InputBoardState extends State<InputBoard> {
         widget.showDropDownMenu) _specs.dropDownValue = widget.dropDownList[0];
     if (_specs.inputTextControllers.length != widget.totalTextFields) {
       _specs.inputTextControllers.length = widget.totalTextFields;
-      print("total input controllers changed to: ${widget.totalTextFields}");
+      log("total input controllers changed to: ${widget.totalTextFields}", name: 'InputBoard');
       for (int i = 0; i < widget.totalTextFields; i++) {
         _specs.inputTextControllers[i] = TextEditingControllerWorkaround();
         _specs.errorText.length = _specs.inputTextControllers.length;
@@ -207,7 +209,7 @@ class _InputBoardState extends State<InputBoard> {
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      print("changing drop down value to: $value");
+                      log("changing drop down value to: $value", name: 'InputBoard');
                       _specs.dropDownValue = value;
                     });
                   },

@@ -21,7 +21,7 @@ class _ProcessedCardsPageState extends State<ProcessedCardsPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("page changed to Page.cards");
+    log("page changed to Page.cards", name: 'cards_page');
     log("Total Cards: ${playerManager.mainPlayer().getAllCardsLength()}",
         name: "cards_page");
     return ValueListenableBuilder(

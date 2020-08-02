@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockexchange/json_classes/json_classes.dart';
 import 'package:stockexchange/global.dart';
@@ -30,15 +32,15 @@ class OnlineRoom extends StatelessWidget {
                   if (snapshot.connectionState == ConnectionState.waiting)
                     return CircularProgressIndicator();
                   if (!snapshot.hasData) return RoomDoesNotExist();
-                  print("snapshot contains data creating online room");
-                  print("data: ${snapshot.data.documentID}");
+                  log("snapshot contains data creating online room", name: 'OnlineRoom');
+                  log("data: ${snapshot.data.documentID}", name: 'OnlineRoom');
                   DocumentSnapshot roomDataDocument = snapshot.data;
                   if (roomDataDocument.data == null) return RoomDoesNotExist();
                   RoomData roomData = RoomData.fromMap(roomDataDocument.data);
                   List<Widget> result = [];
-                  print("mainPlayer UUID: ${Network.authId}");
+                  log("mainPlayer UUID: ${Network.authId}", name: 'OnlineRoom');
                   for (PlayerId player in roomData.playerIds) {
-                    print("player UUID: ${player.uuid}");
+                    log("player UUID: ${player.uuid}", name: 'OnlineRoom');
                     if (player.uuid == Network.authId)
                       result.add(
                         Row(
@@ -59,7 +61,7 @@ class OnlineRoom extends StatelessWidget {
                       result.add(Text(player.name));
                   }
                   if (roomData.playerIds.length == roomData.totalPlayers) {
-                    print(roomData.toMap().toString());
+                    log(roomData.toMap().toString(), name: 'OnlineRoom');
                     startGame(context).then(
                       (value) =>
                           WidgetsBinding.instance.addPostFrameCallback((_) {
