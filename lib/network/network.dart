@@ -157,7 +157,7 @@ class Network {
           throw "${playerId.name} already exist in room restart game with different name";
         }
       }
-      mainPlayer.turn = data.playerIds.length;
+      mainPlayer.turn = null;
       mainPlayer.totalPlayers = data.totalPlayers;
       playerManager.setMainPlayerValues(mainPlayer);
       data.playerIds.add(PlayerId(playerManager.mainPlayerName, authId));

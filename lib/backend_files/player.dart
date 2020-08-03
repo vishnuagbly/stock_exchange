@@ -181,6 +181,7 @@ class Player {
   }
 
   int getCardPrice() {
+    log('card price: $_cardPrice', name: 'getCardPrice');
     if (_cardPrice == null) setCardPrice();
     if (_cardPrice == -1) throw 'cards not for sale';
     return _cardPrice;
@@ -470,6 +471,7 @@ class PlayerManager {
         log("player name: ${player.name}", name: logName);
         mainPlayer.totalPlayers = _totalPlayers;
         if (player.turn == null) mainPlayer.turn = i;
+        else mainPlayer.turn = player.turn;
         _mainPlayerIndex = i;
         _allPlayers.add(mainPlayer);
         if (player.turn != mainPlayer.turn) //if database does not have correct turn;

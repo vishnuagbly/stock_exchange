@@ -33,14 +33,10 @@ class Transaction {
           for (int i = 0; i < totalAssets.length; i++)
             if (totalAssets[i].domain == mainPlayer.name)
               totalAssets[i] = mainPlayer.totalAssets();
-          await transaction.update(Network.mainPlayerFullDataDocRef, {
-            "_money": mainPlayer.money,
-            "shares": mainPlayer.shares,
-          });
-          await transaction.update(Network.mainPlayerDataDocRef, {
-            "_money": mainPlayer.money,
-            "shares": mainPlayer.shares,
-          });
+          await transaction.update(
+              Network.mainPlayerFullDataDocRef, mainPlayer.toFullDataMap());
+          await transaction.update(
+              Network.mainPlayerDataDocRef, mainPlayer.toMap());
           await transaction.update(Network.roomDataDocRef, roomData.toMap());
           await transaction.update(Network.companiesDataDocRef, {
             'companies': Company.allCompaniesToMap(companies),
@@ -160,11 +156,10 @@ class Transaction {
             firestore.document('${Network.roomName}/$playersTurnsDocName'), {
           'turns': 0,
         });
-        for (int j = 0; j < totalAssets.length; j++){
+        for (int j = 0; j < totalAssets.length; j++) {
           var assets = totalAssets[j];
-          for(var player in allPlayers)
-            if(player.name == assets.domain)
-              assets = player.totalAssets();
+          for (var player in allPlayers)
+            if (player.name == assets.domain) assets = player.totalAssets();
           totalAssets[j] = assets;
         }
         roomData.allPlayersTotalAssetsBarCharData = totalAssets;
@@ -173,15 +168,13 @@ class Transaction {
           var ref = playerRefs[i];
           allPlayers[i].incrementPlayerTurn();
           await transaction.update(ref, allPlayers[i].toFullDataMap());
-          log('player[${allPlayers[i].name} is updated', name: 'startNextRound');
+          log('player[${allPlayers[i].name} is updated',
+              name: 'startNextRound');
         }
-
       },
     ).timeout(Duration(seconds: 7), onTimeout: () {
-
       throw 'Time out';
-    })
-        .then((_) {
+    }).then((_) {
       log('completed transaction', name: 'startNextRound');
       Status.send(LoadingStatus.startedNextRound);
     }).catchError((err) async {

@@ -140,7 +140,9 @@ class CardBank {
     return _eachPlayerProcessedCards[0];
   }
 
-  void generateAllCards() {
+  void generateAllCards({int totalPlayers}) {
+    if(totalPlayers == null)
+      totalPlayers = this.totalPlayers;
     dev.log("generating cards", name: "generateAllCards");
 
     ///clearing all lists

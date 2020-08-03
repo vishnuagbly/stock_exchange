@@ -167,7 +167,7 @@ class LoginPage extends StatelessWidget {
         controller.add(PlatformException(code: 'Got code'));
       } else
         log("Wrong Error", name: 'loginPage');
-    }).catchError((error) => log(error, name: 'loginPage->autoRetrieval'));
+    }).catchError((error) => log(error.toString(), name: 'loginPage->autoRetrieval'));
   }
 
   void _verificationFailed(context, AuthException authException) {
