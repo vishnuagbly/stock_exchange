@@ -11,16 +11,15 @@ import 'locked_menu_options.dart';
 WillPopScope backButtonActions(BuildContext context) {
   return WillPopScope(
     onWillPop: () {
-      if (currentPage.value != StockPage.home && currentPage.value != StockPage.start) {
+      if (currentPage.value != StockPage.home &&
+          currentPage.value != StockPage.start) {
         if (fromCompanyPage)
           Navigator.of(context).pushNamed("/company_page");
         else
           currentPage.value = StockPage.home;
-      }
-      else if (currentPage.value == StockPage.start) {
+      } else if (currentPage.value == StockPage.start) {
         Navigator.pop(context);
-      }
-      else {
+      } else {
         showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -116,7 +115,7 @@ WillPopScope backButtonActions(BuildContext context) {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      LockedMenuOptions (StockPage.next),
+                      LockedMenuOptions(StockPage.next),
                       MenuSlate(
                         page: StockPage.home,
                         icon: Icon(
@@ -133,7 +132,7 @@ WillPopScope backButtonActions(BuildContext context) {
                         ),
                         title: "Cards",
                       ),
-                      LockedMenuOptions (StockPage.buy),
+                      LockedMenuOptions(StockPage.buy),
                       MenuSlate(
                         page: StockPage.sell,
                         icon: Icon(

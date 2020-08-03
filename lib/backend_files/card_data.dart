@@ -30,7 +30,8 @@ class Card {
     return result;
   }
 
-  static List<Card> allCardsFromMap(List<Map<String, dynamic>> maps) {
+  static List<Card> allCardsFromMap(List<dynamic> maps) {
+    if (maps == null) return null;
     List<Card> cards = [];
     for (Map<String, dynamic> map in maps) cards.add(Card.fromMap(map));
     return cards;
@@ -55,6 +56,40 @@ class CardBank {
   final List<Company> allCompanies;
 
   CardBank(this.totalPlayers, this.allCompanies);
+
+  CardBank.fromMap(Map<String, dynamic> map)
+      : _allCards = Card.allCardsFromMap(map['_allCards']),
+        _processedCards = Card.allCardsFromMap(map['_processedCards']),
+        _buyableCards = Card.allCardsFromMap(map['_buyableCards']),
+        _eachPlayerCards = listOfListOfCardsFromMap(map['_eachPlayerCards']),
+        _eachPlayerProcessedCards =
+            listOfListOfCardsFromMap(map['_eachPlayerProcessedCards']),
+        totalPlayers = map['totalPlayers'],
+        allCompanies = Company.allCompaniesFromMap(map['allCompanies']);
+
+  Map<String, dynamic> toMap() => {
+        '_allCards': Card.allCardsToMap(_allCards),
+        '_processedCards': Card.allCardsToMap(_processedCards),
+        '_buyableCards': Card.allCardsToMap(_buyableCards),
+        '_eachPlayerCards': listOfListOfCardsToMap(_eachPlayerCards),
+        '_eachPlayerProcessedCards':
+            listOfListOfCardsToMap(_eachPlayerProcessedCards),
+        'totalPlayers': totalPlayers,
+        'allCompanies': Company.allCompaniesToMap(allCompanies),
+      };
+
+  static List<List<Map<String, dynamic>>> listOfListOfCardsToMap(
+      List<List<Card>> cards) {
+    List<List<Map<String, dynamic>>> maps = [];
+    for (var subCards in cards) maps.add(Card.allCardsToMap(subCards));
+    return maps;
+  }
+
+  static List<List<Card>> listOfListOfCardsFromMap(List<dynamic> maps) {
+    List<List<Card>> cards = [];
+    for (var map in maps) cards.add(Card.allCardsFromMap(map));
+    return cards;
+  }
 
   int getCardPrice(int playerBudget) {
     int maxIndex = 0;

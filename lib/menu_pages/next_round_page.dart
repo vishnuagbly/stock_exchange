@@ -1,10 +1,12 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:stockexchange/components/components.dart';
 import 'package:stockexchange/components/dialogs/future_dialog.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/json_classes/json_classes.dart';
 import 'package:stockexchange/network/network.dart';
+import 'package:stockexchange/network/offline_database.dart';
 import 'package:stockexchange/network/transactions.dart';
 
 class NextRoundPage extends StatelessWidget {
@@ -30,13 +32,23 @@ class NextRoundPage extends StatelessWidget {
                         child: Text("YES"),
                         onPressed: () async {
                           if (playerManager.lastTurn() || !online)
-                            log("pressed yes moving to next round", name: 'nextRoundPage');
+                            log("pressed yes moving to next round",
+                                name: 'nextRoundPage');
                           else
-                            log("pressed yes moving to next turn", name: 'nextRoundPage');
+                            log("pressed yes moving to next turn",
+                                name: 'nextRoundPage');
                           currentPage.value = StockPage.home;
                           if (!online) {
                             startNextRound();
-                            cardBank.updateCompanyPrices();
+                            companies = cardBank.updateCompanyPrices();
+                            await showDialog(
+                              context: context,
+                              builder: (context) => FutureDialog(
+                                future: Phone.saveGame(),
+                                loadingText: 'Saving Game...',
+                                hasData: (_) => CommonAlertDialog('Saved Game'),
+                              ),
+                            );
                           } else {
                             showDialog(
                               barrierDismissible: false,

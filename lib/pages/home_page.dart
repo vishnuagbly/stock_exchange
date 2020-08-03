@@ -2,10 +2,12 @@ import 'dart:developer';
 
 import 'package:stockexchange/components/components.dart';
 import 'package:flutter/material.dart';
+import 'package:stockexchange/components/dialogs/boolean_dialog.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/menu_pages/menu_pages.dart';
 import 'package:stockexchange/menu_pages/processed_cards_page.dart';
 import 'package:stockexchange/network/network.dart';
+import 'package:stockexchange/network/offline_database.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,17 +17,37 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool runCheckAlert = true;
 
-
   @override
   void dispose() {
     Network.alertDocSubscription.cancel();
     super.dispose();
   }
 
-
   @override
   void initState() {
     super.initState();
+    Phone.getGame().then((gameExists) {
+      if (gameExists) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showDialog(
+            context: context,
+            builder: (context) => BooleanDialog(
+              'Do you want to continue saved game',
+              onPressedYes: () {
+                startSavedGame(
+                  Phone.savedCardBank,
+                  Phone.players,
+                  Phone.allCompanies,
+                );
+                Navigator.of(context).pop();
+              },
+            ),
+          );
+        });
+      }
+      else
+        log('game not saved', name: initState.toString());
+    });
     showAlerts(context);
     log("afterShowAlerts", name: "checkAndShowAlert");
   }

@@ -94,6 +94,7 @@ class Player {
       "name": name,
       "uuid": uuid,
       "shares": shares,
+      "mainPlayer": mainPlayer,
       "_allCards": shareCard.Card.allCardsToMap(_allCards),
       "_processedCards": shareCard.Card.allCardsToMap(_processedCards),
       "totalTradedCards": totalTradedCards,
@@ -105,10 +106,20 @@ class Player {
     };
   }
 
-  static List<Player> allFullPlayersFromMap(players) {
+  ///players is list of Maps
+  static List<Player> allFullPlayersFromMap(players, {bool savedOffline = false}) {
     List<Player> result = [];
-    for (int i = 0; i < players.length; i++)
-      result.add(Player.fromFullMap(players[i]));
+    for (int i = 0; i < players.length; i++) {
+      if (savedOffline)
+        result.add(
+          Player.fromFullMap(
+            players[i],
+            mainPlayer: players[i]['mainPlayer'],
+          ),
+        );
+      else
+        result.add(Player.fromFullMap(players[i]));
+    }
     return result;
   }
 
@@ -339,21 +350,28 @@ class Player {
 
   ///Returns true if trade accepted.
   bool tradeRequest(TradeDetails tradeDetails) {
-    if (!mainPlayer) {
+    if (!mainPlayer && turn > playerManager.mainPlayerTurn) {
       if (tradeDetails.moneyRequested <= tradeDetails.moneyOffered) {
         if (tradeDetails.cardsOffered >= tradeDetails.cardsRequested)
           return true;
-        else
-          return false;
-      }
-      if ((tradeDetails.moneyOffered - tradeDetails.moneyRequested) /
-              (tradeDetails.cardsRequested - tradeDetails.cardsOffered) >
-          1000) {
-        return true;
-      } else
         return false;
-    } else
-      return false;
+      }
+      if (tradeDetails.cardsRequested > tradeDetails.cardsOffered) {
+        if ((tradeDetails.moneyOffered - tradeDetails.moneyRequested) /
+                (tradeDetails.cardsRequested - tradeDetails.cardsOffered) >
+            (maths.max(money * 0.1, 10000))) {
+          return true;
+        }
+        return false;
+      } else if (tradeDetails.cardsRequested == tradeDetails.cardsOffered) {
+        if (tradeDetails.moneyOffered >= tradeDetails.moneyRequested)
+          return true;
+        return false;
+      } else if ((tradeDetails.moneyRequested - tradeDetails.moneyOffered) /
+              (tradeDetails.cardsOffered - tradeDetails.cardsRequested) <=
+          money * 0.03) return true;
+    }
+    return false;
   }
 
   ///Performs trade considering the other player as requesting trade.
@@ -422,9 +440,19 @@ class PlayerManager {
   ];
   List<Player> _allPlayers = [];
 
+  List<Player> get allPlayers => _allPlayers;
+
   bool lastTurn() => mainPlayerTurn == (totalPlayers - 1);
 
-  PlayerManager(this._totalPlayers, int turn) : this._mainPlayerIndex = turn;
+  PlayerManager(this._totalPlayers, int turn, {List<Player> allPlayers})
+      : this._mainPlayerIndex = turn,
+        _allPlayers = allPlayers ?? []{
+    if(allPlayers != null){
+      for(var player in allPlayers)
+        if(player.mainPlayer)
+          setValueNotifier(money: player.money);
+    }
+  }
 
   void setAllPlayersData(List<Map<String, dynamic>> playersMap) {
     String logName = "player/setAllPlayersData()";
@@ -488,8 +516,8 @@ class PlayerManager {
     return result;
   }
 
-  void setValueNotifier() {
-    balance = ValueNotifier(_allPlayers[_mainPlayerIndex].money);
+  void setValueNotifier({int money}) {
+    balance = ValueNotifier(money ?? _allPlayers[_mainPlayerIndex].money);
   }
 
   void setAllPlayersValues(List<List<shareCard.Card>> playerCards,
@@ -590,11 +618,25 @@ class PlayerManager {
     );
   }
 
-  void otherPlayerTurns() {
+  void otherPlayersTurn(bool beforeMainPlayer) {
+    List<Player> players = [];
+    players.length = totalPlayers;
     for (int i = 0; i < _allPlayers.length; i++) {
-      if (!_allPlayers[i].mainPlayer) _allPlayers[i].autoPlay();
+      players[_allPlayers[i].turn] = _allPlayers[i];
     }
+    if (beforeMainPlayer)
+      for (int i = 0; i < mainPlayerTurn; i++) {
+        players[i].autoPlay();
+      }
+    else
+      for (int i = totalPlayers - 1; i > mainPlayerTurn; i--)
+        players[i].autoPlay();
     yourTurn = false;
+  }
+
+  void incrementPlayerTurns() {
+    for (int i = 0; i < _allPlayers.length; i++)
+      _allPlayers[i].incrementPlayerTurn();
   }
 
   Player mainPlayer() {
@@ -649,7 +691,10 @@ class PlayerManager {
 
   List<BarChartData> allPlayersAssetsBarGraph() {
     List<BarChartData> result = [];
-    for (Player player in _allPlayers) result.add(player.totalAssets());
+    List<Player> players = [];
+    players.length = totalPlayers;
+    for (Player player in _allPlayers) players[player.turn] = player;
+    for (Player player in players) result.add(player.totalAssets());
     return result;
   }
 

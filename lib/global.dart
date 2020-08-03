@@ -37,7 +37,7 @@ enum LoadingStatus {
   tradeComplete,
 }
 
-String getPageTitle (StockPage page) {
+String getPageTitle(StockPage page) {
   switch (page) {
     case StockPage.home:
       {
@@ -133,7 +133,7 @@ final kConnectionPageName = "/connection_page";
 final kCompanyPageName = "/company_page";
 final kCreateOnlineRoomName = "/create_online_room";
 final kJoinRoomName = "/join_room";
-final kLoginPageName =  "/login_page";
+final kLoginPageName = "/login_page";
 final kEnterPlayersPageName = "/enter_players";
 final kRoomOptionsPageName = "/room_options";
 final kLoadingPageName = '/loading_page';
@@ -169,7 +169,7 @@ final kAlertDialogButtonTextSize = screenWidth * 0.04;
 ValueNotifier<int> balance;
 ValueNotifier<int> mainPlayerCards = ValueNotifier(0);
 ValueNotifier<int> homeListChanged = ValueNotifier(0);
-var currentPage = ValueNotifier (StockPage.start);
+var currentPage = ValueNotifier(StockPage.start);
 
 ///variables
 bool online = false;
@@ -230,7 +230,7 @@ CardBank cardBank;
 PlayerManager playerManager;
 
 ///start game
-void startGame(int totalPlayers){
+void startGame(int totalPlayers) {
   cardBank = shareCard.CardBank(totalPlayers, companies);
   playerManager = PlayerManager(totalPlayers, 0);
   currentPage.value = StockPage.home;
@@ -238,14 +238,36 @@ void startGame(int totalPlayers){
   startNextRound();
 }
 
+void startSavedGame(
+  CardBank savedCardBank,
+  List<Player> players,
+  List<Company> allCompanies,
+) {
+  cardBank = savedCardBank;
+  int turn;
+  for (int i = 0; i < players.length; i++) {
+    var player = players[i];
+    if(player.mainPlayer)
+      turn = i;
+  }
+  playerManager = PlayerManager(players.length, turn, allPlayers: players);
+  currentPage.value = StockPage.home;
+  companies = allCompanies;
+  playerManager.otherPlayersTurn(true);
+}
+
 ///Start of each round
 void startNextRound() {
+  if (!online) {
+    playerManager.otherPlayersTurn(true);
+  }
   mainPlayerCards.value = 0;
   cardBank.generateAllCards();
   playerManager.setAllPlayersValues(
       cardBank.getEachPlayerCards(), cardBank.getEachPlayerProcessedCards());
   if (!online) {
-    playerManager.otherPlayerTurns();
+    playerManager.otherPlayersTurn(false);
+    playerManager.incrementPlayerTurns();
   }
 }
 

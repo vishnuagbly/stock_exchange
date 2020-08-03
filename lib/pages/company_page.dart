@@ -306,7 +306,7 @@ class _CompanyStatsState extends State<CompanyStats> {
                   height: 50,
                   alignment: Alignment.bottomLeft,
                   child: Text(
-                    "Total Shares: 100",
+                    "Total Shares: 2,00,000",
                     style: TextStyle(
                       fontSize: screenWidth * 0.04,
                     ),

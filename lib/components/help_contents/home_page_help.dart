@@ -49,6 +49,8 @@ class HomePageHelp extends StatelessWidget {
         Text("There might be some locked options in menu, it is because currently it might not be your turn"),
         SizedBox(height: 5),
         Text("Click on info icon on each page for additional info on each."),
+        SizedBox(height: 5),
+        Text('You can check your turn from everyone\'s assets menu.'),
       ],
     );
   }

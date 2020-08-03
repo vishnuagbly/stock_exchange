@@ -32,6 +32,8 @@ dependencies:
   shared_preferences: ^0.5.7+1
   flutter_tex: ^3.6.7+4
   flutter_launcher_icons: ^0.7.5
+  sembast: ^2.4.7+4
+  path_provider: ^1.6.11
 
 dev_dependencies:
   flutter_test:
