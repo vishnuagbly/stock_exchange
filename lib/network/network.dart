@@ -107,6 +107,9 @@ class Network {
   static Future<void> createRoom() async {
     log("calling to create room name", name: 'createRoom');
     await createRoomName();
+    Player mainPlayer = playerManager.mainPlayer();
+    mainPlayer.turn = null;
+    playerManager.setMainPlayerValues(mainPlayer);
     log("room created", name: 'createRoom');
     log("total players: ${playerManager.totalPlayers}", name: 'createRoom');
     createDocument(
@@ -119,10 +122,7 @@ class Network {
     createDocument(companiesDataDocumentName, {
       "companies": Company.allCompaniesToMap(companies),
     });
-    createDocument("$playerDataCollectionPath/$authId",
-        playerManager.mainPlayer().toMap());
-    createDocument("$playerFullDataCollectionPath/$authId",
-        playerManager.mainPlayer().toFullDataMap());
+    uploadMainPlayerAllData();
     resetPlayerTurns();
     setTimestamp();
     log('room created', name: 'createRoom');
@@ -190,14 +190,12 @@ class Network {
   }
 
   ///update all main player data online with data on device.
-  static Future<void> updateAllMainPlayerData() async {
+  static Future<void> updateMainPlayerAndRoomData() async {
     if (roomName == "null") return;
     log("roomName: $roomName", name: "updateAllMainPlayerData");
     mainPlayerCards.value++;
     balance.value = playerManager.mainPlayer().money;
-    await updateData("$playerDataCollectionPath/$authId",
-        playerManager.mainPlayer().toMap());
-    await updateMainPlayerFullData();
+    await uploadMainPlayerAllData();
     Map<String, dynamic> dataMap = await getData(roomDataDocumentName);
     RoomData roomData = RoomData.fromMap(dataMap);
     List<BarChartData> totalAssets = roomData.allPlayersTotalAssetsBarCharData;
@@ -206,12 +204,6 @@ class Network {
         totalAssets[i] = playerManager.mainPlayer().totalAssets();
     roomData.allPlayersTotalAssetsBarCharData = totalAssets;
     await updateData("$roomDataDocumentName", roomData.toMap());
-  }
-
-  static Future<void> updateMainPlayerFullData() async {
-    if (roomName == "null") return;
-    updateData("$playerFullDataCollectionPath/$authId",
-        playerManager.mainPlayer().toFullDataMap());
   }
 
   static Future<void> updateCompaniesData() async {

@@ -138,6 +138,8 @@ class Transaction {
         log("stariting next round", name: "startNextOnlineRound");
         List<DocumentSnapshot> documents = [];
         for (var ref in playerRefs) documents.add(await transaction.get(ref));
+        var roomDataSnapshot = await transaction.get(Network.roomDataDocRef);
+        var roomData = RoomData.fromMap(roomDataSnapshot.data);
         await Status.send(LoadingStatus.calculationStarted);
         List<Player> allPlayers = Player.allFullPlayersFromMap(
             Network.getAllDataFromDocuments(documents));
@@ -148,6 +150,7 @@ class Transaction {
         allPlayers.setNewCards(cardBank.getEachPlayerCards(),
             cardBank.getEachPlayerProcessedCards());
         log('setted new cards', name: 'startNextRound');
+        var totalAssets = roomData.allPlayersTotalAssetsBarCharData;
         await Status.send(LoadingStatus.calculationCompleted);
         await transaction.update(Network.companiesDataDocRef, {
           'companies': Company.allCompaniesToMap(tempCompanies),
@@ -157,12 +160,22 @@ class Transaction {
             firestore.document('${Network.roomName}/$playersTurnsDocName'), {
           'turns': 0,
         });
+        for (int j = 0; j < totalAssets.length; j++){
+          var assets = totalAssets[j];
+          for(var player in allPlayers)
+            if(player.name == assets.domain)
+              assets = player.totalAssets();
+          totalAssets[j] = assets;
+        }
+        roomData.allPlayersTotalAssetsBarCharData = totalAssets;
+        await transaction.update(Network.roomDataDocRef, roomData.toMap());
         for (int i = 0; i < playerRefs.length; i++) {
           var ref = playerRefs[i];
           allPlayers[i].incrementPlayerTurn();
           await transaction.update(ref, allPlayers[i].toFullDataMap());
           log('player[${allPlayers[i].name} is updated', name: 'startNextRound');
         }
+
       },
     ).timeout(Duration(seconds: 7), onTimeout: () {
 

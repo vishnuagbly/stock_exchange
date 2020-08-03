@@ -41,7 +41,7 @@ class LockedMenuOptions extends StatelessWidget {
             return UnlockedOpt(lockedPage);
           }
           currentTurn = false;
-          return LockedMenuOpt();
+          return LockedMenuOpt(currentTurn: playerTurn.turn);
         });
   }
 }
@@ -81,15 +81,25 @@ class UnlockedOpt extends StatelessWidget {
 }
 
 class LockedMenuOpt extends StatelessWidget {
+  LockedMenuOpt({this.currentTurn});
+
+  final int currentTurn;
+
   @override
   Widget build(BuildContext context) {
+    int mainPlayerTurn = playerManager.mainPlayerTurn + 1;
+    String title = 'your turn: $mainPlayerTurn';
+    log('current Turn: $currentTurn', name: 'lockedMenuOpt');
+    if(currentTurn != null)
+      title += '\ncurrent turn: ${currentTurn + 1}';
+    log('title: $title', name: 'lockedMenuOpt');
     return MenuSlate(
       getSelected: false,
       icon: Icon(
         Icons.lock,
         color: Colors.grey,
       ),
-      title: "Locked",
+      title: title,
     );
   }
 }

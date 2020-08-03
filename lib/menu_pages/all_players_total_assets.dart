@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:stockexchange/backend_files/player.dart';
+import 'package:stockexchange/components/components.dart';
 import 'package:stockexchange/global.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stockexchange/network/network.dart';
@@ -8,7 +10,6 @@ import 'package:stockexchange/json_classes/json_classes.dart';
 import 'package:stockexchange/charts/bar_chart.dart';
 
 class TotalAssetsMenuPage extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return SliverList(
@@ -19,8 +20,7 @@ class TotalAssetsMenuPage extends StatelessWidget {
               child: Container(
                 margin: EdgeInsets.all(20),
                 padding: EdgeInsets.all(20),
-                height:
-                screen.orientation == Orientation.portrait
+                height: screen.orientation == Orientation.portrait
                     ? screenWidth * 0.85
                     : screenWidth * 1.5 * 0.85,
                 constraints: BoxConstraints(
@@ -32,14 +32,13 @@ class TotalAssetsMenuPage extends StatelessWidget {
                     child: online
                         ? TotalAssetsPlayersOnline()
                         : BarChart(
-                      barChartDataGenerator(
-                        playerManager
-                            .allPlayersAssetsBarGraph(),
-                        color: Colors.red,
-                      ),
-                      true,
-                      screen,
-                    ),
+                            barChartDataGenerator(
+                              playerManager.allPlayersAssetsBarGraph(),
+                              color: Colors.red,
+                            ),
+                            true,
+                            screen,
+                          ),
                   ),
                 ),
               ),
@@ -67,16 +66,39 @@ class TotalAssetsPlayersOnline extends StatelessWidget {
         log("room exists", name: logName);
         DocumentSnapshot roomDataDocument = snapshot.data;
         if (roomDataDocument.data == null) return Container();
+        List<BarChartData> data = [];
+        List<BarChartData> barChartData;
         RoomData roomData = RoomData.fromMap(roomDataDocument.data);
         log("room Data successfully created", name: logName);
-        List<BarChartData> barChartData =
-            roomData.allPlayersTotalAssetsBarCharData;
-        log("got Bar Chart Data", name: logName);
-        for(int i = 0; i < barChartData.length; i++)
-          log("i: $i ${barChartData[i].toString()}");
+        try {
+          List<Player> allPlayers = playerManager.allPlayers;
+          barChartData = roomData.allPlayersTotalAssetsBarCharData;
+          data.length = barChartData.length;
+          for (var player in allPlayers) {
+            for (var barData in barChartData)
+              if (barData.domain == player.name) data[player.turn] = barData;
+          }
+          log("got Bar Chart Data", name: logName);
+          for (var subData in data)
+            if (subData == null) {
+              data = barChartData;
+              break;
+            }
+        } catch (err) {
+          if (barChartData != null)
+            data = barChartData;
+          else
+            return CommonAlertDialog(
+              'Some Error',
+              icon: Icon(
+                Icons.block,
+                color: Colors.red,
+              ),
+            );
+        }
         return BarChart(
           barChartDataGenerator(
-            barChartData,
+            data,
             color: Colors.red,
           ),
           true,

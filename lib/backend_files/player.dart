@@ -107,7 +107,8 @@ class Player {
   }
 
   ///players is list of Maps
-  static List<Player> allFullPlayersFromMap(players, {bool savedOffline = false}) {
+  static List<Player> allFullPlayersFromMap(players,
+      {bool savedOffline = false}) {
     List<Player> result = [];
     for (int i = 0; i < players.length; i++) {
       if (savedOffline)
@@ -446,11 +447,10 @@ class PlayerManager {
 
   PlayerManager(this._totalPlayers, int turn, {List<Player> allPlayers})
       : this._mainPlayerIndex = turn,
-        _allPlayers = allPlayers ?? []{
-    if(allPlayers != null){
-      for(var player in allPlayers)
-        if(player.mainPlayer)
-          setValueNotifier(money: player.money);
+        _allPlayers = allPlayers ?? [] {
+    if (allPlayers != null) {
+      for (var player in allPlayers)
+        if (player.mainPlayer) setValueNotifier(money: player.money);
     }
   }
 
@@ -469,11 +469,11 @@ class PlayerManager {
         log("player id: ${player.uuid}", name: logName);
         log("player name: ${player.name}", name: logName);
         mainPlayer.totalPlayers = _totalPlayers;
-        mainPlayer.turn = i;
+        if (player.turn == null) mainPlayer.turn = i;
         _mainPlayerIndex = i;
         _allPlayers.add(mainPlayer);
-        if (player.turn != i) //if database does not have correct turn;
-          Network.updateAllMainPlayerData();
+        if (player.turn != mainPlayer.turn) //if database does not have correct turn;
+          Network.updateMainPlayerAndRoomData();
       }
       log("$i: ${_allPlayers[i].toMap().toString()}", name: logName);
     }
@@ -542,7 +542,7 @@ class PlayerManager {
     if (index == null) throw '${player.name} doesn\'t exist';
     _allPlayers[index].buyCards(numOfCards);
     if (online) {
-      await Network.updateAllMainPlayerData();
+      await Network.updateMainPlayerAndRoomData();
     }
   }
 
@@ -646,7 +646,7 @@ class PlayerManager {
   void setMainPlayerValues(Player mainPlayer) {
     _allPlayers[_mainPlayerIndex] = mainPlayer;
     balance.value = mainPlayer.money;
-    Network.updateAllMainPlayerData();
+    Network.updateMainPlayerAndRoomData();
   }
 
   void setOfflineMainPlayerData(Player mainPlayer) {

@@ -56,6 +56,7 @@ class MenuSlate extends StatelessWidget {
                           color: Colors.white,
                           fontSize: screenWidth * 0.028,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
