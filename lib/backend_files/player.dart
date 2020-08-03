@@ -190,7 +190,7 @@ class Player {
   void setCardPrice() {
     log('setting card price', name: 'setCardPrice');
     try {
-      _cardPrice = cardBank.getCardPrice(_money);
+      _cardPrice = cardBank.getCardPrice(totalAssets().measure.toInt());
     } catch (error) {
       log('Error: ${error.toString()}', name: 'setCardPrice');
       _cardPrice = -1;
