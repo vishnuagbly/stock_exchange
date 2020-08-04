@@ -169,6 +169,7 @@ final kAlertDialogButtonTextSize = screenWidth * 0.04;
 ValueNotifier<int> balance;
 ValueNotifier<int> mainPlayerCards = ValueNotifier(0);
 ValueNotifier<int> homeListChanged = ValueNotifier(0);
+ValueNotifier<int> playerDataChanged = ValueNotifier(0);
 var currentPage = ValueNotifier(StockPage.start);
 
 ///variables

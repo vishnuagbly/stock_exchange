@@ -659,6 +659,7 @@ class PlayerManager {
   void setPlayerData(Player player) {
     for (int i = 0; i < _allPlayers.length; i++)
       if (_allPlayers[i].uuid == player.uuid) {
+        playerDataChanged.value++;
         _allPlayers[i] = player;
         return;
       }
@@ -684,7 +685,12 @@ class PlayerManager {
     return result;
   }
 
-  List<BarChartData> allPlayersBarGraphAllSharesData(Player player) {
+  ///if both player and playerIndex is provided than player will be considered
+  ///over playerIndex.
+  ///If neither are provided than it returns null;
+  List<BarChartData> playerBarGraphAllSharesData({Player player, int playerIndex}) {
+    if(player == null && playerIndex == null) return null;
+    if(player == null) player = _allPlayers[playerIndex];
     List<BarChartData> result = [];
     for (int i = 0; i < player.shares.length; i++)
       result.add(BarChartData(companies[i].name, player.shares[i].toDouble()));

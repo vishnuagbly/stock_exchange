@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:stockexchange/components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:stockexchange/components/dialogs/boolean_dialog.dart';
@@ -16,16 +19,33 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool runCheckAlert = true;
+  StreamSubscription connection;
 
   @override
   void dispose() {
     Network.alertDocSubscription.cancel();
+    connection.cancel();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    connection = DataConnectionChecker().onStatusChange.listen((event) {
+      if (event == DataConnectionStatus.disconnected && online)
+        showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) => CommonAlertDialog(
+            'NO INTERNET CONNECTION',
+            icon: Icon(
+              Icons.block,
+              color: Colors.red,
+              size: 25,
+            ),
+          ),
+        );
+    });
     Phone.getGame().then((gameExists) {
       if (gameExists) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -44,8 +64,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
           );
         });
-      }
-      else
+      } else
         log('game not saved', name: initState.toString());
     });
     showAlerts(context);

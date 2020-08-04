@@ -19,6 +19,9 @@ class LockedMenuOptions extends StatelessWidget {
                 "${Network.gameDataPath}/$playersTurnsDocName")
             .snapshots(),
         builder: (context, snapshot) {
+          if(snapshot.hasError) {
+
+          }
           if (!snapshot.hasData) {
             log("room does not exist", name: "LockedMenuOptions");
             if (!online) return UnlockedOpt(lockedPage);
