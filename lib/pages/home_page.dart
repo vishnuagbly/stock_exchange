@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:stockexchange/components/components.dart';
