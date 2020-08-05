@@ -90,7 +90,11 @@ class LockedMenuOpt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int mainPlayerTurn = playerManager.mainPlayerTurn + 1;
+    int mainPlayerTurn;
+    if(playerManager != null)
+      mainPlayerTurn = playerManager.mainPlayerTurn + 1;
+    else
+      mainPlayerTurn = null;
     String title = 'your turn: $mainPlayerTurn';
     log('current Turn: $currentTurn', name: 'lockedMenuOpt');
     if(currentTurn != null)

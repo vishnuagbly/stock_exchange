@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'splash_screen.dart';
 import 'package:stockexchange/network/network.dart';
 import 'pages/all_pages.dart';
 import 'global.dart';
@@ -48,14 +49,26 @@ class _MyAppState extends State<MyApp> {
         kCompanyPageName: (BuildContext context) => CompanyPage(
               pageCompany,
             ),
-        "/": (BuildContext context) => ScrollConfiguration(
+        "/": (BuildContext context) => SplashScreen(
+              seconds: 5,
+              navigateAfterSeconds: kHomePageName,
+              backgroundColor: Color(0xff282828),
+              photoSize: 100,
+              imageBackground: DecorationImage(
+                image: AssetImage('images/logo.jpg'),
+                fit: BoxFit.contain,
+              ),
+              loaderColor: Colors.white70,
+              title: Text('STOCK EXCHANGE'),
+            ),
+        kHomePageName: (BuildContext context) => ScrollConfiguration(
               behavior: MyBehavior(),
               child: HomePage(),
             ),
         kCreateOnlineRoomName: (BuildContext context) => LoadingScreen(
-          future: Network.createRoom(),
-          func: (_) => OnlineRoom(),
-        ),
+              future: Network.createRoom(),
+              func: (_) => OnlineRoom(),
+            ),
         kJoinRoomName: (BuildContext context) => JoinRoom(),
         kLoginPageName: (BuildContext context) => LoginPage(),
         kEnterPlayersPageName: (BuildContext context) => EnterTotalPlayers(),

@@ -50,7 +50,7 @@ class EnterTotalPlayers extends StatelessWidget {
                 inputValue[0] = specs.getTextFieldIntValue(0);
                 startGame(inputValue[0]);
                 if (!online)
-                  Navigator.popUntil(context, ModalRoute.withName("/"));
+                  Navigator.popUntil(context, ModalRoute.withName(kHomePageName));
                 else if (online) {
                   String authId = await Network.getAuthId();
                   if (authId == null)

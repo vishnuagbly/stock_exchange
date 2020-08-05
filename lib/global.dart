@@ -130,6 +130,7 @@ bool currentTurn = false;
 ///constant values
 final kRupeeChar = "\u20b9";
 final kConnectionPageName = "/connection_page";
+final kHomePageName = '/home_page';
 final kCompanyPageName = "/company_page";
 final kCreateOnlineRoomName = "/create_online_room";
 final kJoinRoomName = "/join_room";

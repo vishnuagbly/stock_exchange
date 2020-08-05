@@ -65,7 +65,7 @@ class OnlineRoom extends StatelessWidget {
                     startGame(context).then(
                       (value) =>
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                        Navigator.popUntil(context, ModalRoute.withName("/"));
+                        Navigator.popUntil(context, ModalRoute.withName(kHomePageName));
                       }),
                     );
                   }
