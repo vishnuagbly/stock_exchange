@@ -237,7 +237,13 @@ void startGame(int totalPlayers) {
   playerManager = PlayerManager(totalPlayers, 0);
   currentPage.value = StockPage.home;
   playerManager.generatePlayers([tempPlayerName]);
-  startNextRound();
+  cardBank.generateAllCards();
+  mainPlayerCards.value = 0;
+  playerManager.setAllPlayersValues(
+      cardBank.getEachPlayerCards(), cardBank.getEachPlayerProcessedCards());
+  if(!online){
+    playerManager.otherPlayersTurn(true);
+  }
 }
 
 void startSavedGame(
@@ -261,15 +267,16 @@ void startSavedGame(
 ///Start of each round
 void startNextRound() {
   if (!online) {
-    playerManager.otherPlayersTurn(true);
+    playerManager.otherPlayersTurn(false);
   }
   mainPlayerCards.value = 0;
+  playerDataChanged.value = 0;
   cardBank.generateAllCards();
   playerManager.setAllPlayersValues(
       cardBank.getEachPlayerCards(), cardBank.getEachPlayerProcessedCards());
   if (!online) {
-    playerManager.otherPlayersTurn(false);
     playerManager.incrementPlayerTurns();
+    playerManager.otherPlayersTurn(true);
   }
 }
 

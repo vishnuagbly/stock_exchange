@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
         "/": (BuildContext context) => SplashScreen(
               seconds: 5,
               navigateAfterSeconds: kHomePageName,
-              backgroundColor: Color(0xff282828),
+              backgroundColor: Colors.black,
               photoSize: 100,
               imageBackground: DecorationImage(
                 image: AssetImage('images/logo.jpg'),
