@@ -17,7 +17,12 @@ class MyBehavior extends ScrollBehavior {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   final mySystemTheme = SystemUiOverlayStyle.light
       .copyWith(systemNavigationBarColor: Colors.black);
 
