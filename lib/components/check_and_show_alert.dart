@@ -6,7 +6,7 @@ import 'package:stockexchange/global.dart';
 import 'package:stockexchange/network/network.dart';
 import 'package:stockexchange/json_classes/json_classes.dart';
 
-StreamController<Alert> alertsController = StreamController();
+StreamController<Alert> alertsController = StreamController.broadcast();
 
 StreamSubscription<QuerySnapshot> checkAndShowAlert() {
   log("reahed checkAndShowAlert", name: "checkAndShowAlert");
@@ -30,13 +30,14 @@ StreamSubscription<QuerySnapshot> checkAndShowAlert() {
   return alertSubscription;
 }
 
-void showAlerts(BuildContext context) async {
+StreamSubscription<Alert> showAlerts(BuildContext context) {
   String logName = "checkAndShowAlerts->showAlerts";
   log("alternative Program is sleeping", name: logName);
   Stream<Alert> stream = alertsController.stream;
-  stream.listen((Alert alert) async {
+  var subscription = stream.listen((Alert alert) async {
     await alert.showDialog(context);
   });
+  return subscription;
 }
 
 Future<void> addToAlerts(List<Map<String, dynamic>> allAlertMaps) async {

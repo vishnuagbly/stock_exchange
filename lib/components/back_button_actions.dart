@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:stockexchange/components/components.dart';
+import 'package:stockexchange/components/dialogs/boolean_dialog.dart';
 import 'package:stockexchange/global.dart';
 import 'dart:io';
 import 'menu_slate.dart';
@@ -16,56 +18,18 @@ WillPopScope backButtonActions(BuildContext context) {
         if (fromCompanyPage)
           Navigator.of(context).pushNamed("/company_page");
         else
-          currentPage.value = StockPage.home;
+          exit(0);
       } else if (currentPage.value == StockPage.start) {
         Navigator.pop(context);
       } else {
         showDialog(
             context: context,
             builder: (BuildContext context) {
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(kAlertDialogBorderRadius),
-                  ),
-                ),
-                elevation: kAlertDialogElevation,
-                backgroundColor: Color(kAlertDialogBackgroundColorCode),
-                title: Text(
-                  "ARE YOU SURE TO EXIT",
-                  style: TextStyle(
-                    fontSize: kAlertDialogTitleTextSize,
-                    fontFamily: "Roboto",
-                  ),
-                ),
-                actions: <Widget>[
-                  FlatButton(
-                    color: Colors.transparent,
-                    child: Text(
-                      "YES",
-                      style: TextStyle(
-                        fontSize: kAlertDialogButtonTextSize,
-                        color: Colors.teal,
-                      ),
-                    ),
-                    onPressed: () {
-                      exit(0);
-                    },
-                  ),
-                  FlatButton(
-                    color: Colors.transparent,
-                    child: Text(
-                      "NO",
-                      style: TextStyle(
-                        fontSize: kAlertDialogButtonTextSize,
-                        color: Colors.teal,
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
+              return BooleanDialog(
+                'DO YOU WANT TO RESTART',
+                onPressedYes: () {
+                  Phoenix.rebirth(context);
+                },
               );
             });
       }

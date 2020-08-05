@@ -19,12 +19,18 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool runCheckAlert = true;
   StreamSubscription connection;
+  StreamSubscription alertDialogSubscription;
 
   @override
-  void dispose() {
-    Network.alertDocSubscription.cancel();
-    connection.cancel();
+  void dispose() async {
     super.dispose();
+    if (Network.alertDocSubscription != null)
+      await Network.alertDocSubscription.cancel();
+    await connection.cancel();
+    if (alertDialogSubscription != null) await alertDialogSubscription.cancel();
+    playerManager = null;
+    cardBank = null;
+    currentPage.value = StockPage.start;
   }
 
   @override
@@ -66,7 +72,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       } else
         log('game not saved', name: initState.toString());
     });
-    showAlerts(context);
+    if (alertDialogSubscription == null)
+      alertDialogSubscription = showAlerts(context);
     log("afterShowAlerts", name: "checkAndShowAlert");
   }
 

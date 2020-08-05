@@ -3,12 +3,17 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'splash_screen.dart';
 import 'package:stockexchange/network/network.dart';
 import 'pages/all_pages.dart';
 import 'global.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(
+      Phoenix(
+        child: MyApp(),
+      ),
+    );
 
 class MyBehavior extends ScrollBehavior {
   @override
@@ -59,7 +64,6 @@ class _MyAppState extends State<MyApp> {
                 fit: BoxFit.contain,
               ),
               loaderColor: Colors.white70,
-              title: Text('STOCK EXCHANGE'),
             ),
         kHomePageName: (BuildContext context) => ScrollConfiguration(
               behavior: MyBehavior(),
