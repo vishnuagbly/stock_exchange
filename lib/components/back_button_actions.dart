@@ -18,9 +18,9 @@ WillPopScope backButtonActions(BuildContext context) {
         if (fromCompanyPage)
           Navigator.of(context).pushNamed("/company_page");
         else
-          exit(0);
+          currentPage.value = StockPage.home;
       } else if (currentPage.value == StockPage.start) {
-        Navigator.pop(context);
+        exit(0);
       } else {
         showDialog(
             context: context,
