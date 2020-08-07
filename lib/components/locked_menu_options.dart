@@ -1,10 +1,6 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:stockexchange/network/network.dart';
 import 'menu_slate.dart';
 import 'package:stockexchange/global.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:stockexchange/json_classes/json_classes.dart';
 
 class LockedMenuOptions extends StatelessWidget {
   final StockPage lockedPage;
@@ -13,38 +9,17 @@ class LockedMenuOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: Network.firestore
-            .document(
-                "${Network.gameDataPath}/$playersTurnsDocName")
-            .snapshots(),
-        builder: (context, snapshot) {
-          if(snapshot.hasError) {
-
-          }
-          if (!snapshot.hasData) {
-            log("room does not exist", name: "LockedMenuOptions");
-            if (!online) return UnlockedOpt(lockedPage);
-            return LockedMenuOpt();
-          }
-//          log("room exists", name: "LockedMenuOptions");
-          DocumentSnapshot playerTurnsDocument = snapshot.data;
-          if (playerTurnsDocument.data == null) {
-            log("no data inside room collection", name: "LockedMenuOptions");
-            if (!online) return UnlockedOpt(lockedPage);
-            return LockedMenuOpt();
-          }
-          PlayerTurn playerTurn = PlayerTurn.fromMap(playerTurnsDocument.data);
-          log("acquired player turns successfully: ${playerTurn.turn}",
-              name: "LockedMenuOptions");
-          log("your turn: ${playerManager.mainPlayerTurn}",
-              name: "LockedMenuOption");
-          if (playerTurn.turn == playerManager.mainPlayerTurn){
-            currentTurn = true;
+    return ValueListenableBuilder(
+        valueListenable: currentTurnChanged,
+        builder: (context, value, _) {
+          if(!online) return UnlockedOpt(lockedPage);
+          if(currentTurnChanged.value == null) return LockedMenuOpt();
+          if (value == playerManager.mainPlayerTurn){
+            yourTurn = true;
             return UnlockedOpt(lockedPage);
           }
-          currentTurn = false;
-          return LockedMenuOpt(currentTurn: playerTurn.turn);
+          yourTurn = false;
+          return LockedMenuOpt(currentTurn: value);
         });
   }
 }
@@ -90,23 +65,13 @@ class LockedMenuOpt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int mainPlayerTurn;
-    if(playerManager != null)
-      mainPlayerTurn = playerManager.mainPlayerTurn + 1;
-    else
-      mainPlayerTurn = null;
-    String title = 'your turn: $mainPlayerTurn';
-    log('current Turn: $currentTurn', name: 'lockedMenuOpt');
-    if(currentTurn != null)
-      title += '\ncurrent turn: ${currentTurn + 1}';
-    log('title: $title', name: 'lockedMenuOpt');
     return MenuSlate(
       getSelected: false,
       icon: Icon(
         Icons.lock,
         color: Colors.grey,
       ),
-      title: title,
+      title: 'Locked',
     );
   }
 }

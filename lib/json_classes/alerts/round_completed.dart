@@ -10,6 +10,7 @@ import 'package:stockexchange/global.dart';
 import 'package:stockexchange/json_classes/alerts/alert.dart';
 import 'package:stockexchange/json_classes/round_loading_status.dart';
 import 'package:stockexchange/network/network.dart';
+import 'package:stockexchange/pages/game_finished_page.dart';
 
 class CompletingRound extends Alert {
   CompletingRound() : super();
@@ -34,7 +35,7 @@ class CompletingRound extends Alert {
         barrierDismissible: false,
         builder: (context) {
           return StreamBuilder<DocumentSnapshot>(
-            stream: Network.getDocumentStream(loadingStatusDocName),
+            stream: Network.getDocumentStream(kLoadingStatusDocName),
             builder: (context, snapshot) {
               String status = "Completing Round";
               if (snapshot.data != null && snapshot.data.data != null) {
@@ -43,7 +44,7 @@ class CompletingRound extends Alert {
                 if (statusObj.status == LoadingStatus.startedNextRound) {
                   startNextRound();
                   return FutureDialog(
-                    future: Network.getAndSetMainPlayerFullData(),
+                    future: Network.getAndSetNewRoundsDetails(),
                     loadingText: 'Downloading Updates...',
                     hasData: (_) => CommonAlertDialog(
                       "Started Next Round",
@@ -52,6 +53,9 @@ class CompletingRound extends Alert {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           // ignore: invalid_use_of_protected_member
                           homePageState.setState(() {});
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            ifGameFinished();
+                          });
                         });
                         Navigator.pop(context);
                       },

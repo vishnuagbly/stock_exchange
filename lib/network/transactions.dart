@@ -137,6 +137,8 @@ class Transaction {
         var roomDataSnapshot = await transaction.get(Network.roomDataDocRef);
         var roomData = RoomData.fromMap(roomDataSnapshot.data);
         await Status.send(LoadingStatus.calculationStarted);
+
+
         List<Player> allPlayers = Player.allFullPlayersFromMap(
             Network.getAllDataFromDocuments(documents));
         List<shareCard.Card> allCards = getAllCards(allPlayers);
@@ -147,7 +149,16 @@ class Transaction {
             cardBank.getEachPlayerProcessedCards());
         log('setted new cards', name: 'startNextRound');
         var totalAssets = roomData.allPlayersTotalAssetsBarCharData;
+        for (int j = 0; j < totalAssets.length; j++) {
+          var assets = totalAssets[j];
+          for (var player in allPlayers)
+            if (player.name == assets.domain) assets = player.totalAssets();
+          totalAssets[j] = assets;
+        }
+        roomData.allPlayersTotalAssetsBarCharData = totalAssets;
         await Status.send(LoadingStatus.calculationCompleted);
+
+
         await transaction.update(Network.companiesDataDocRef, {
           'companies': Company.allCompaniesToMap(tempCompanies),
         });
@@ -156,14 +167,10 @@ class Transaction {
             firestore.document('${Network.roomName}/$playersTurnsDocName'), {
           'turns': 0,
         });
-        for (int j = 0; j < totalAssets.length; j++) {
-          var assets = totalAssets[j];
-          for (var player in allPlayers)
-            if (player.name == assets.domain) assets = player.totalAssets();
-          totalAssets[j] = assets;
-        }
-        roomData.allPlayersTotalAssetsBarCharData = totalAssets;
         await transaction.update(Network.roomDataDocRef, roomData.toMap());
+        await transaction.update(Network.roundsDocRef, {
+          'currentRound': playerManager.currentRound + 1,
+        });
         for (int i = 0; i < playerRefs.length; i++) {
           var ref = playerRefs[i];
           allPlayers[i].incrementPlayerTurn();
@@ -191,7 +198,7 @@ Future<void> sendRoundCompleteAlert() async {
   CompletingRound completingRound = CompletingRound();
   for (int i = 0; i < playerManager.totalPlayers; i++) {
     Network.createDocument(
-        "$alertDocumentName/${playerManager.getPlayerId(index: i)}/${Network.authId}",
+        "$kAlertDocName/${playerManager.getPlayerId(index: i)}/${Network.authId}",
         completingRound.toMap());
   }
   log("sent alert to everyone", name: "setRoundCompleteAlert");

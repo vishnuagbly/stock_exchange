@@ -5,93 +5,99 @@ import 'package:flutter_tex/flutter_tex.dart';
 class CardsPageHelp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    ScrollController controller = ScrollController();
     screen = MediaQuery.of(context);
     return Container(
       constraints: BoxConstraints(
         maxHeight: screenHeight * 0.6,
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text("Here on this page sum of all your cards are shown."),
-            SizedBox(height: 20),
-            Text(
-              "ABOUT CARDS:-",
-              style: TextStyle(
+      child: Scrollbar(
+        controller: controller,
+        isAlwaysShown: true,
+        child: SingleChildScrollView(
+          controller: controller,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text("Here on this page sum of all your cards are shown."),
+              SizedBox(height: 20),
+              Text(
+                "ABOUT CARDS:-",
+                style: TextStyle(
+                  color: Colors.green[700],
+                  fontSize: screenWidth * 0.04,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Divider(
                 color: Colors.green[700],
-                fontSize: screenWidth * 0.04,
-                fontWeight: FontWeight.bold,
+                thickness: 2,
               ),
-            ),
-            Divider(
-              color: Colors.green[700],
-              thickness: 2,
-            ),
-            Text("Every round each player gets 10 cards."),
-            SizedBox(height: 5),
-            Text(
-                "Values on each cards determines the next share price of this company."),
-            SizedBox(height: 5),
-            Text(
-                "Sum of all cards values with each player and some extra cards in bank determines the next share value for each company."),
-            SizedBox(height: 5),
-            Text(
-                "Click on any card to see all cards of that company you have "),
-            SizedBox(height: 10),
-            Text(
-              "HOW CARDS ARE GENERATED:-",
-              style: TextStyle(
+              Text("Every round each player gets 10 cards."),
+              SizedBox(height: 5),
+              Text(
+                  "Values on each cards determines the next share price of this company."),
+              SizedBox(height: 5),
+              Text(
+                  "Sum of all cards values with each player and some extra cards in bank determines the next share value for each company."),
+              SizedBox(height: 5),
+              Text(
+                  "Click on any card to see all cards of that company you have "),
+              SizedBox(height: 10),
+              Text(
+                "HOW CARDS ARE GENERATED:-",
+                style: TextStyle(
+                  color: Colors.blue[700],
+                  fontSize: screenWidth * 0.04,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Divider(
                 color: Colors.blue[700],
-                fontSize: screenWidth * 0.04,
-                fontWeight: FontWeight.bold,
+                thickness: 2,
               ),
-            ),
-            Divider(
-              color: Colors.blue[700],
-              thickness: 2,
-            ),
-            Text(
-                "Cards are generated from a complex algorithm, such that cards with higher the value lesser it's chance to be generated."),
-            SizedBox(height: 10),
-            Text(
-              "MORE INFO FOR NERDS  ( MAY GET UNFAIR ADVANTAGE OVER OTHERS ):-",
-              style: TextStyle(
-                fontSize: screenWidth * 0.04,
+              Text(
+                  "Cards are generated from a complex algorithm, such that cards with higher the value lesser it's chance to be generated."),
+              SizedBox(height: 10),
+              Text(
+                "MORE INFO FOR NERDS  ( MAY GET UNFAIR ADVANTAGE OVER OTHERS ):-",
+                style: TextStyle(
+                  fontSize: screenWidth * 0.04,
+                  color: Colors.red[700],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Divider(
                 color: Colors.red[700],
-                fontWeight: FontWeight.bold,
+                thickness: 2,
               ),
-            ),
-            Divider(
-              color: Colors.red[700],
-              thickness: 2,
-            ),
-            Text("Algorithm works like this"),
-            SizedBox(height: 5),
-            Text(
-                "First number of cards are decided to be generated. For each player there are 10 cards generated and extra cards are 20 for each player but never more than 60 extra cards in total"),
-            SizedBox(height: 5),
-            Text(
-                "Than each card is generated where probablity is decided by the graph generated by following equation:-"),
-            SizedBox(height: 5),
-            expression(r"""<p>\(y=[19e^{-(\frac{x}{25})^6} + 1][5e^{-(\frac{x}{100})^4}]\)</p>"""),
-            SizedBox(height: 5),
-            Text("With this formula we get following graph"),
-            SizedBox(height: 5),
-            Image.asset("images/graph.png"),
-            SizedBox(height: 15),
-            Text("With the above formula we can conclude following:- "),
-            SizedBox(height: 5),
-            Text(
-                "Cards with value about less than 30 has more than 50% chance to be generated"),
-            SizedBox(height: 5),
-            Text(
-                "Cards with value in range 30-45 has chance between 50%-3% to be generated."),
-            SizedBox(height: 5),
-            Text(
-                "Cards with value about more than 45 has less than 3% chance to be generated."),
-          ],
+              Text("Algorithm works like this"),
+              SizedBox(height: 5),
+              Text(
+                  "First number of cards are decided to be generated. For each player there are 10 cards generated and extra cards are 20 for each player but never more than 60 extra cards in total"),
+              SizedBox(height: 5),
+              Text(
+                  "Than each card is generated where probablity is decided by the graph generated by following equation:-"),
+              SizedBox(height: 5),
+              expression(r"""<p>\(y=[19e^{-(\frac{x}{25})^6} + 1][5e^{-(\frac{x}{100})^4}]\)</p>"""),
+              SizedBox(height: 5),
+              Text("With this formula we get following graph"),
+              SizedBox(height: 5),
+              Image.asset("images/graph.png"),
+              SizedBox(height: 15),
+              Text("With the above formula we can conclude following:- "),
+              SizedBox(height: 5),
+              Text(
+                  "Cards with value about less than 30 has more than 50% chance to be generated"),
+              SizedBox(height: 5),
+              Text(
+                  "Cards with value in range 30-45 has chance between 50%-3% to be generated."),
+              SizedBox(height: 5),
+              Text(
+                  "Cards with value about more than 45 has less than 3% chance to be generated."),
+            ],
+          ),
         ),
       ),
     );

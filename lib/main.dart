@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'pages/game_finished_page.dart';
 import 'splash_screen.dart';
 import 'package:stockexchange/network/network.dart';
 import 'pages/all_pages.dart';
@@ -77,6 +78,7 @@ class _MyAppState extends State<MyApp> {
         kLoginPageName: (BuildContext context) => LoginPage(),
         kEnterPlayersPageName: (BuildContext context) => EnterTotalPlayers(),
         kRoomOptionsPageName: (BuildContext context) => RoomOptions(),
+        kGameFinishedPageName: (BuildContext context) => GameFinished(),
       },
     );
   }

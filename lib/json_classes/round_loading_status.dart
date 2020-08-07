@@ -46,6 +46,6 @@ class Status {
   static Future<void> send(LoadingStatus statusEnum) async {
     Status status = Status(statusEnum);
     await Network.createDocument(
-        loadingStatusDocName, status.toMap());
+        kLoadingStatusDocName, status.toMap());
   }
 }

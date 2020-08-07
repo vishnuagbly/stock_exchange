@@ -59,7 +59,7 @@ class RoomOptions extends StatelessWidget {
                     SelectionButton(
                       "JOIN",
                       () async {
-                        startGame(6);
+                        startGame(6, 5);
                         String authId = await Network.getAuthId();
                         if (authId == null)
                           Navigator.pushNamed(context, "/login_page");

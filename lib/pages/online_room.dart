@@ -20,19 +20,19 @@ class OnlineRoom extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(30),
               decoration: BoxDecoration(
-                color: Color(0xFF121212),
+                color: kPrimaryColor,
                 borderRadius: BorderRadius.all(Radius.circular(20)),
               ),
               child: StreamBuilder<DocumentSnapshot>(
                 stream: Network.firestore
-                    .document(
-                        "${Network.gameDataPath}/$roomDataDocumentName")
+                    .document("${Network.gameDataPath}/$kRoomDataDocName")
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting)
                     return CircularProgressIndicator();
                   if (!snapshot.hasData) return RoomDoesNotExist();
-                  log("snapshot contains data creating online room", name: 'OnlineRoom');
+                  log("snapshot contains data creating online room",
+                      name: 'OnlineRoom');
                   log("data: ${snapshot.data.documentID}", name: 'OnlineRoom');
                   DocumentSnapshot roomDataDocument = snapshot.data;
                   if (roomDataDocument.data == null) return RoomDoesNotExist();
@@ -65,7 +65,8 @@ class OnlineRoom extends StatelessWidget {
                     startGame(context).then(
                       (value) =>
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                        Navigator.popUntil(context, ModalRoute.withName(kHomePageName));
+                        Navigator.popUntil(
+                            context, ModalRoute.withName(kHomePageName));
                       }),
                     );
                   }
@@ -87,10 +88,15 @@ class OnlineRoom extends StatelessWidget {
   }
 
   Future<void> getAndSetPlayerData() async {
+    var rounds = Rounds.fromMap(await Network.getData(kRoundsDocName));
     playerManager.setAllPlayersData(
-        await Network.getAllDocuments(playerDataCollectionPath));
+      await Network.getAllDocuments(playerDataCollectionPath),
+      rounds.totalRounds,
+      rounds.currentRound,
+    );
     await Network.checkAndDownloadPlayersData();
     await Network.checkAndDownLoadCompaniesData();
+    await Network.checkAndUpdateCurrentTurn();
   }
 }
 

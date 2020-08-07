@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:stockexchange/backend_files/backend_files.dart';
-import 'file:///D:/FlutterProjects/stock_exchange/lib/components/dialogs/common_alert_dialog.dart';
+import 'package:stockexchange/components/dialogs/common_alert_dialog.dart';
 import 'package:stockexchange/network/transactions.dart';
 import 'trade_accepted.dart';
 import 'trade_declined.dart';
@@ -88,7 +88,7 @@ class TradeAlert extends Alert {
           onPressed: () async {
             Future complete = Transaction.makeTrade(tradeDetails);
             TradeAccepted tradeAccepted = TradeAccepted(tradeDetails);
-            Network.createDocument("$alertDocumentName/$uuid/${Network.authId}",
+            Network.createDocument("$kAlertDocName/$uuid/${Network.authId}",
                 tradeAccepted.toMap());
             Navigator.of(context).pop();
             showDialog(
@@ -148,7 +148,7 @@ class TradeAlert extends Alert {
           onPressed: () async {
             TradeDeclined tradeDeclined = TradeDeclined();
             await Network.createDocument(
-                "$alertDocumentName/$uuid/${Network.authId}",
+                "$kAlertDocName/$uuid/${Network.authId}",
                 tradeDeclined.toMap());
             Navigator.of(context).pop();
           },

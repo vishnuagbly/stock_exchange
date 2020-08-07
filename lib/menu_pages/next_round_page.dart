@@ -8,6 +8,7 @@ import 'package:stockexchange/json_classes/json_classes.dart';
 import 'package:stockexchange/network/network.dart';
 import 'package:stockexchange/network/offline_database.dart';
 import 'package:stockexchange/network/transactions.dart';
+import 'package:stockexchange/pages/game_finished_page.dart';
 
 class NextRoundPage extends StatelessWidget {
   @override
@@ -49,6 +50,7 @@ class NextRoundPage extends StatelessWidget {
                                 hasData: (_) => CommonAlertDialog('Saved Game'),
                               ),
                             );
+                            ifGameFinished();
                           } else {
                             showDialog(
                               barrierDismissible: false,

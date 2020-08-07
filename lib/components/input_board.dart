@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:stockexchange/global.dart';
-import 'file:///D:/FlutterProjects/stock_exchange/lib/components/dialogs/common_alert_dialog.dart';
+import 'package:stockexchange/components/dialogs/common_alert_dialog.dart';
 
 class TextEditingControllerWorkaround extends TextEditingController {
   TextEditingControllerWorkaround({String text}) : super(text: text);
@@ -16,6 +16,14 @@ class TextEditingControllerWorkaround extends TextEditingController {
   }
 }
 
+extension setText on TextEditingController {
+  set newText(String text) {
+    this.text = text;
+    this.selection =
+        TextSelection.fromPosition(TextPosition(offset: this.text.length));
+  }
+}
+
 class InputBoardSpecs {
   String value; //do not use
   List<TextEditingControllerWorkaround> inputTextControllers = [];
@@ -26,7 +34,13 @@ class InputBoardSpecs {
 
   InputBoardSpecs(this.state, this.dropDownValue);
 
-  int getTextFieldIntValue(int index) {
+  ///if [nullIfEmpty] is true than return null in case of any empty field,
+  ///Otherwise it returns 0 in case of empty field.
+  ///
+  /// Note:- always returns null in case of text == ' '.
+  int getTextFieldIntValue(int index, {bool nullIfEmpty = false}) {
+    if(nullIfEmpty && inputTextControllers[index].text == null)
+      return null;
     int result;
     try {
       String text = inputTextControllers[index].text;
@@ -50,6 +64,15 @@ class InputBoardSpecs {
     return inputValues;
   }
 
+  void setAllFieldsText(List<String> texts) {
+    assert(texts.length >= inputTextControllers.length);
+    for(int i = 0; i < inputTextControllers.length; i++)
+      inputTextControllers[i].newText = texts[i];
+  }
+
+  void setFieldText(int index, String text) =>
+      inputTextControllers[index].newText = text;
+
   void clearAllTextFields() {
     for (TextEditingController controller in inputTextControllers)
       controller.text = "";
@@ -59,7 +82,8 @@ class InputBoardSpecs {
   void checkAndTakeActionIfCompanyIsBankrupt(BuildContext context) {
     String companyName = dropDownValue;
     if (getCompany(companyName).getCurrentSharePrice().toInt() == 0) {
-      log("Company is Bankrupt", name: checkAndTakeActionIfCompanyIsBankrupt.toString());
+      log("Company is Bankrupt",
+          name: checkAndTakeActionIfCompanyIsBankrupt.toString());
       errorText.length = inputTextControllers.length;
       setBoardState(() {
         errorText.last = "Company is Bankrupt";
@@ -111,15 +135,20 @@ class InputBoardSpecs {
   void clearErrors() {
     errorText = [];
     errorText.length = inputTextControllers.length;
-    showError(errorText);
+    showAllErrors(errorText);
   }
 
-  void showError(List<String> errorText) {
+  void showAllErrors(List<String> errorText) {
     setBoardState(() {
       this.errorText = errorText;
     });
   }
 
+  void showError(int index, String errorText) {
+    setBoardState(() {
+      this.errorText[index] = errorText;
+    });
+  }
   // ignore: invalid_use_of_protected_member
   void setBoardState(Function fn) => state.setState(fn);
 }
@@ -183,7 +212,8 @@ class _InputBoardState extends State<InputBoard> {
         widget.showDropDownMenu) _specs.dropDownValue = widget.dropDownList[0];
     if (_specs.inputTextControllers.length != widget.totalTextFields) {
       _specs.inputTextControllers.length = widget.totalTextFields;
-      log("total input controllers changed to: ${widget.totalTextFields}", name: 'InputBoard');
+      log("total input controllers changed to: ${widget.totalTextFields}",
+          name: 'InputBoard');
       for (int i = 0; i < widget.totalTextFields; i++) {
         _specs.inputTextControllers[i] = TextEditingControllerWorkaround();
         _specs.errorText.length = _specs.inputTextControllers.length;
@@ -209,7 +239,8 @@ class _InputBoardState extends State<InputBoard> {
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      log("changing drop down value to: $value", name: 'InputBoard');
+                      log("changing drop down value to: $value",
+                          name: 'InputBoard');
                       _specs.dropDownValue = value;
                     });
                   },

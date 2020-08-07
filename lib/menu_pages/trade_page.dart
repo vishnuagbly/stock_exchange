@@ -5,7 +5,7 @@ import 'package:stockexchange/backend_files/backend_files.dart';
 import 'package:stockexchange/components/dialogs/future_dialog.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/components/input_board.dart';
-import 'file:///D:/FlutterProjects/stock_exchange/lib/components/dialogs/common_alert_dialog.dart';
+import 'package:stockexchange/components/dialogs/common_alert_dialog.dart';
 
 class TradePage extends StatelessWidget {
   @override
@@ -67,12 +67,12 @@ class TradePage extends StatelessWidget {
           if (money > actualMoney) {
             money = actualMoney;
             specs.inputTextControllers[3].text = money.toString();
-            specs.showError(
+            specs.showAllErrors(
                 ["", "", "", "this is the maximum money person can offer"]);
           } else if (money < 0) {
             money = 0;
             specs.inputTextControllers[3].text = money.toString();
-            specs.showError(["", "", "", "money should be greater than 0"]);
+            specs.showAllErrors(["", "", "", "money should be greater than 0"]);
           }
         },
       ],
@@ -117,7 +117,7 @@ class TradePage extends StatelessWidget {
     errorText.length = 4;
     if (playerName == null || playerName == "") {
       errorText[3] = "please select player";
-      specs.showError(errorText);
+      specs.showAllErrors(errorText);
     }
     List<int> inputValues = specs.getAllTextFieldIntValues();
     for (int i = 0; i < inputValues.length; i++)

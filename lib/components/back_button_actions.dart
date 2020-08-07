@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:stockexchange/components/components.dart';
+import 'help_button.dart';
 import 'package:stockexchange/components/dialogs/boolean_dialog.dart';
+import 'pop_up_menu.dart';
 import 'package:stockexchange/global.dart';
 import 'dart:io';
 import 'menu_slate.dart';
-import 'app_bar_leading_arrow.dart';
 import 'package:stockexchange/Icons/custom_icon_icons.dart';
 import 'app_bar_actions.dart';
 import 'locked_menu_options.dart';
@@ -40,15 +40,12 @@ WillPopScope backButtonActions(BuildContext context) {
       builder: (context, value, _) {
         return SliverAppBar(
           pinned: true,
-          leading: (value == StockPage.home || value == StockPage.start)
-              ? null
-              : LeadingArrow(),
           expandedHeight: screenWidth,
           title: ValueListenableBuilder(
             valueListenable: currentPage,
             builder: (context, value, _) {
               return Text(
-                "\t" + getPageTitle(value),
+                getPageTitle(value),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
@@ -67,6 +64,7 @@ WillPopScope backButtonActions(BuildContext context) {
                   )
                 : Container(),
             HelpButton(),
+            playerManager != null ? PopUpMenu() : Container(),
           ],
           flexibleSpace: FlexibleSpaceBar(
 //                      collapseMode: CollapseMode.none,

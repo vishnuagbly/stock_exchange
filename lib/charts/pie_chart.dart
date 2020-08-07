@@ -50,7 +50,7 @@ class PieChart extends StatelessWidget {
         milliseconds: 500,
       ),
       defaultRenderer: CustomArcRendererConfig(
-        stroke: convertColor(Color(0xFF121212)),
+        stroke: convertColor(kPrimaryColor),
         arcWidth: (screenWidth * 0.06).toInt(),
         strokeWidthPx: 5.0,
       ),

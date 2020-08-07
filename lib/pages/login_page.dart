@@ -52,7 +52,7 @@ class LoginPage extends StatelessWidget {
             onPressedButton: (specs) async {
               int phoneNumber = specs.getTextFieldIntValue(0);
               if (phoneNumber < 1000000000)
-                specs.showError(["Enter Correct Phone Number"]);
+                specs.showAllErrors(["Enter Correct Phone Number"]);
               else {
                 _verifyPhoneNumber(context, phoneNumber, specs);
                 await showDialog(

@@ -15,36 +15,46 @@ class TotalAssetsMenuPage extends StatelessWidget {
     return SliverList(
       delegate: SliverChildListDelegate(
         [
-          Container(
-            child: Center(
-              child: Container(
-                margin: EdgeInsets.all(20),
-                padding: EdgeInsets.all(20),
-                height: screen.orientation == Orientation.portrait
-                    ? screenWidth * 0.85
-                    : screenWidth * 1.5 * 0.85,
-                constraints: BoxConstraints(
-                  maxWidth: screenWidth * 1.5,
-                ),
-                decoration: kSlateBackDecoration,
-                child: Center(
-                  child: Container(
-                    child: online
-                        ? TotalAssetsPlayersOnline()
-                        : BarChart(
-                            barChartDataGenerator(
-                              playerManager.allPlayersAssetsBarGraph(),
-                              color: Colors.red,
-                            ),
-                            true,
-                            screen,
-                          ),
-                  ),
-                ),
-              ),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: TotalAssetsCard(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class TotalAssetsCard extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          height: screen.orientation == Orientation.portrait
+              ? screenWidth * 0.85
+              : screenWidth * 1.5 * 0.85,
+          constraints: BoxConstraints(
+            maxWidth: screenWidth * 1.5,
+          ),
+          decoration: kSlateBackDecoration,
+          child: Center(
+            child: Container(
+              child: online
+                  ? TotalAssetsPlayersOnline()
+                  : BarChart(
+                      barChartDataGenerator(
+                        playerManager.allPlayersAssetsBarGraph(),
+                        color: Colors.red,
+                      ),
+                      true,
+                      screen,
+                    ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -56,7 +66,7 @@ class TotalAssetsPlayersOnline extends StatelessWidget {
     String logName = "TotalAssetsPlayerOnline";
     return StreamBuilder<DocumentSnapshot>(
       stream: Network.firestore
-          .document("${Network.gameDataPath}/$roomDataDocumentName")
+          .document("${Network.gameDataPath}/$kRoomDataDocName")
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {

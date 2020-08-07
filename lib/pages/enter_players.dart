@@ -19,9 +19,8 @@ class EnterTotalPlayers extends StatelessWidget {
             showDropDownMenu: false,
             sliverListType: false,
             dropDownList: [],
-            totalTextFields: 1,
-            inputText: ["Enter number of players: "],
-            inputType: [TextInputType.number],
+            inputText: ["Enter number of players: ", "Enter total round: "],
+            inputType: [TextInputType.number, TextInputType.number],
             inputOnChanged: [
               (specs) {
                 int totalPlayers = specs.getTextFieldIntValue(0);
@@ -35,31 +34,37 @@ class EnterTotalPlayers extends StatelessWidget {
                   });
                 } else {
                   specs.errorText[0] = "";
-                  specs.showError(specs.errorText);
+                  specs.showAllErrors(specs.errorText);
                 }
+              },
+              (specs) {
+                var totalRounds = specs.getTextFieldIntValue(1);
+                if (5 <= totalRounds && totalRounds <= 100)
+                  specs.showError(1, '');
               }
             ],
             onPressedButton: (specs) async {
-              var inputs = specs.inputTextControllers;
-              if (inputs[0].text == null || inputs[0].text == "") {
+              var totalPlayers =
+                  specs.getTextFieldIntValue(0, nullIfEmpty: true);
+              var totalRounds =
+                  specs.getTextFieldIntValue(1, nullIfEmpty: true);
+              if (totalPlayers == null) {
                 specs.errorText[0] = "Total Players are important";
-                specs.showError(specs.errorText);
-              } else {
-                List<int> inputValue = [];
-                inputValue.addAll([0]);
-                inputValue[0] = specs.getTextFieldIntValue(0);
-                startGame(inputValue[0]);
-                if (!online)
-                  Navigator.popUntil(context, ModalRoute.withName(kHomePageName));
-                else if (online) {
-                  String authId = await Network.getAuthId();
-                  if (authId == null)
-                    Navigator.pushNamed(context, kLoginPageName);
-                  else {
-                    specs.showInfo(["You are now online"]);
-                    log("uuid: $authId", name: 'enter_players');
-                    Navigator.pushNamed(context, kCreateOnlineRoomName);
-                  }
+                specs.showAllErrors(specs.errorText);
+                return;
+              }
+              if (!checkTotalRounds(specs)) return;
+              startGame(totalPlayers, totalRounds);
+              if (!online)
+                Navigator.popUntil(context, ModalRoute.withName(kHomePageName));
+              else if (online) {
+                String authId = await Network.getAuthId();
+                if (authId == null)
+                  Navigator.pushNamed(context, kLoginPageName);
+                else {
+                  specs.showInfo(["You are now online"]);
+                  log("uuid: $authId", name: 'enter_players');
+                  Navigator.pushNamed(context, kCreateOnlineRoomName);
                 }
               }
             },
@@ -67,5 +72,20 @@ class EnterTotalPlayers extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  bool checkTotalRounds(InputBoardSpecs specs) {
+    int totalRounds = specs.getTextFieldIntValue(1);
+    log('total_rounds: $totalRounds', name: 'enter_players');
+    if (totalRounds > 100) {
+      specs.setFieldText(1, '100');
+      specs.showAllErrors(['', 'total rounds cannot be greater than 100']);
+      return false;
+    } else if (totalRounds < 5) {
+      specs.setFieldText(1, '5');
+      specs.showAllErrors(['', 'total rounds cannot be less than 5']);
+      return false;
+    }
+    return true;
   }
 }

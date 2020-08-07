@@ -33,7 +33,7 @@ class TradeAccepted extends Alert {
     return material.showDialog(
       context: context,
       builder: (context) => StreamBuilder<DocumentSnapshot>(
-        stream: Network.getDocumentStream(loadingStatusDocName),
+        stream: Network.getDocumentStream(kLoadingStatusDocName),
         builder: (context, snapshot) {
           if (snapshot.data != null && snapshot.data.data != null) {
             Status statusObj = Status.fromMap(snapshot.data.data);

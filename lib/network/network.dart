@@ -19,19 +19,19 @@ class Network {
   static String authId;
   static StreamSubscription<QuerySnapshot> alertDocSubscription;
 
-  static String get alertCollectionPath => "$alertDocumentName/$authId";
+  static String get alertCollectionPath => "$kAlertDocName/$authId";
 
   static String get gameDataPath => "$roomName";
 
   static Network get instance => Network();
 
   static String _roomName = "null";
+
   static String get roomName => _roomName;
 
   static Future<void> setRoomName(String name) async {
     _roomName = name;
-    if(alertDocSubscription != null)
-      await alertDocSubscription.cancel();
+    if (alertDocSubscription != null) await alertDocSubscription.cancel();
     alertDocSubscription = checkAndShowAlert();
   }
 
@@ -40,7 +40,7 @@ class Network {
 
   static List<DocumentReference> get allPlayersFullDataRefs {
     List<DocumentReference> refs = [];
-    for(int i = 0; i < playerManager.totalPlayers; i++)
+    for (int i = 0; i < playerManager.totalPlayers; i++)
       refs.add(playerFullDataRef(playerManager.getPlayerId(index: i)));
     return refs;
   }
@@ -54,10 +54,13 @@ class Network {
       firestore.document('$roomName/$playerDataCollectionPath/$uuid');
 
   static DocumentReference get roomDataDocRef =>
-      firestore.document('$roomName/$roomDataDocumentName');
+      firestore.document('$roomName/$kRoomDataDocName');
 
   static DocumentReference get companiesDataDocRef =>
       firestore.document('$roomName/$companiesDataDocumentPath');
+
+  static DocumentReference get roundsDocRef =>
+      firestore.document('$roomName/$kRoundsDocName');
 
   static Future<bool> checkInternetConnection() async {
     try {
@@ -98,9 +101,10 @@ class Network {
   }
 
   static Future<void> createRoomName() async {
-    String roomName = playerManager.mainPlayerName + rand.nextInt(1000).toString();
+    String roomName =
+        playerManager.mainPlayerName + rand.nextInt(1000).toString();
     await setRoomName(roomName);
-    if (await documentExists(roomDataDocumentName)) createRoomName();
+    if (await documentExists(kRoomDataDocName)) createRoomName();
     log("room name: $roomName", name: 'createRoomName');
   }
 
@@ -113,15 +117,17 @@ class Network {
     log("room created", name: 'createRoom');
     log("total players: ${playerManager.totalPlayers}", name: 'createRoom');
     createDocument(
-        roomDataDocumentName,
+        kRoomDataDocName,
         RoomData(
           playerManager.totalPlayers,
           [PlayerId(playerManager.mainPlayerName, authId)],
           [playerManager.mainPlayer().totalAssets()],
         ).toMap());
-    createDocument(companiesDataDocumentName, {
+    createDocument(kCompaniesDataDocName, {
       "companies": Company.allCompaniesToMap(companies),
     });
+    createDocument(kRoundsDocName,
+        Rounds(playerManager.totalRounds, playerManager.currentRound).toMap());
     uploadMainPlayerAllData();
     resetPlayerTurns();
     setTimestamp();
@@ -135,11 +141,10 @@ class Network {
   }
 
   static Future<bool> joinRoom() async {
-    Map<String, dynamic> dataMap = await getData(roomDataDocumentName);
+    Map<String, dynamic> dataMap = await getData(kRoomDataDocName);
     Map<String, dynamic> mainPlayerData =
         await getData("$playerFullDataCollectionPath/$authId");
-    Map<String, dynamic> companiesMap =
-        await getData(companiesDataDocumentName);
+    Map<String, dynamic> companiesMap = await getData(kCompaniesDataDocName);
     if (dataMap == null) throw "Room does not exist";
     RoomData data = RoomData.fromMap(dataMap);
     var mainPlayer = playerManager.mainPlayer();
@@ -164,7 +169,7 @@ class Network {
       data.allPlayersTotalAssetsBarCharData
           .add(playerManager.mainPlayer().totalAssets());
       await uploadMainPlayerAllData();
-      await updateData(roomDataDocumentName, data.toMap());
+      await updateData(kRoomDataDocName, data.toMap());
     } else {
       for (int i = 0; i < data.playerIds.length; i++)
         if (data.playerIds[i].uuid == authId) {
@@ -177,9 +182,20 @@ class Network {
     return Future.value(true);
   }
 
+  static Future<void> getAndSetNewRoundsDetails() async {
+    await getAndSetMainPlayerFullData();
+    await getAndSetCurrentRoundValue();
+    mainPlayerTurnChanged.value = playerManager.mainPlayerTurn;
+  }
+
   static Future<void> getAndSetMainPlayerFullData() async {
     var mainPlayerData = await getData("$playerFullDataCollectionPath/$authId");
     playerManager.setOfflineMainPlayerData(Player.fromFullMap(mainPlayerData));
+  }
+
+  static Future<void> getAndSetCurrentRoundValue() async {
+    var rounds = Rounds.fromMap(await getData(kRoundsDocName));
+    playerManager.currentRound = rounds.currentRound;
   }
 
   static Future<void> uploadMainPlayerAllData() async {
@@ -196,26 +212,26 @@ class Network {
     mainPlayerCards.value++;
     balance.value = playerManager.mainPlayer().money;
     await uploadMainPlayerAllData();
-    Map<String, dynamic> dataMap = await getData(roomDataDocumentName);
+    Map<String, dynamic> dataMap = await getData(kRoomDataDocName);
     RoomData roomData = RoomData.fromMap(dataMap);
     List<BarChartData> totalAssets = roomData.allPlayersTotalAssetsBarCharData;
     for (int i = 0; i < totalAssets.length; i++)
       if (totalAssets[i].domain == playerManager.mainPlayerName)
         totalAssets[i] = playerManager.mainPlayer().totalAssets();
     roomData.allPlayersTotalAssetsBarCharData = totalAssets;
-    await updateData("$roomDataDocumentName", roomData.toMap());
+    await updateData("$kRoomDataDocName", roomData.toMap());
   }
 
   static Future<void> updateCompaniesData() async {
     if (roomName == "null") return;
-    updateData(companiesDataDocumentName, {
+    updateData(kCompaniesDataDocName, {
       "companies": Company.allCompaniesToMap(companies),
     });
   }
 
   static Future<void> checkAndDownLoadCompaniesData() async {
     Stream<DocumentSnapshot> stream =
-        getDocumentStream("$companiesDataDocumentName");
+        getDocumentStream("$kCompaniesDataDocName");
     stream.listen((DocumentSnapshot snapshot) {
       if (snapshot.data == null)
         throw PlatformException(code: 'COMPANIES_DATA_NULL');
@@ -245,6 +261,24 @@ class Network {
     });
   }
 
+  static Future<void> checkAndUpdateCurrentTurn() async {
+    final playerTurnStream = Network.firestore
+        .document("${Network.roomName}/$playersTurnsDocName")
+        .snapshots();
+
+    playerTurnStream.listen((playerTurnDocument) {
+      PlayerTurn playerTurn = PlayerTurn.fromMap(playerTurnDocument.data);
+      currentTurnChanged.value = playerTurn.turn;
+      log('new current turn: ${playerTurn.turn}', name: 'updateCurrentTurn');
+      log('main Player turn: ${playerManager.mainPlayerTurn}',
+          name: 'updateCrrentTurn');
+      if (playerTurn.turn == playerManager.mainPlayerTurn)
+        yourTurn = true;
+      else
+        yourTurn = false;
+    });
+  }
+
   static Future<List<Map<String, dynamic>>> getAllDocuments(
       String collectionPath) async {
     QuerySnapshot querySnapshot =
@@ -253,10 +287,9 @@ class Network {
   }
 
   static List<Map<String, dynamic>> getAllDataFromDocuments(
-       List<DocumentSnapshot> documents) {
+      List<DocumentSnapshot> documents) {
     List<Map<String, dynamic>> result = [];
-    for (DocumentSnapshot document in documents)
-      result.add(document.data);
+    for (DocumentSnapshot document in documents) result.add(document.data);
     return result;
   }
 
@@ -278,7 +311,8 @@ class Network {
     try {
       document = await firestore.document("$gameDataPath/$documentName").get();
       if (document.data != null) {
-        log('got doc $documentName: ${document.data.toString()}', name: 'getDocument');
+        log('got doc $documentName: ${document.data.toString()}',
+            name: 'getDocument');
         setTimestamp();
       }
     } catch (error) {
@@ -336,14 +370,18 @@ class Network {
 
   static Future<bool> documentExists(String documentPath,
       {printConsole: true}) async {
-    if (printConsole) log("checking if document exists", name: 'documentExists');
+    if (printConsole)
+      log("checking if document exists", name: 'documentExists');
     DocumentSnapshot snapshot =
         await firestore.document("$gameDataPath/$documentPath").get();
     if (snapshot == null || !snapshot.exists) {
-      if (printConsole) log("$gameDataPath/$documentPath does not exists", name: 'documentExists');
+      if (printConsole)
+        log("$gameDataPath/$documentPath does not exists",
+            name: 'documentExists');
       return Future.value(false);
     }
-    if (printConsole) log("$gameDataPath/$documentPath exists", name: 'documentExists');
+    if (printConsole)
+      log("$gameDataPath/$documentPath exists", name: 'documentExists');
     return Future.value(true);
   }
 

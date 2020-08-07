@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'file:///D:/FlutterProjects/stock_exchange/lib/components/dialogs/common_alert_dialog.dart';
+import 'common_alert_dialog.dart';
 import 'package:stockexchange/components/dialogs/loading_dialog.dart';
 
 class FutureDialog<T> extends StatelessWidget {

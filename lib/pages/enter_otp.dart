@@ -46,7 +46,7 @@ class EnterOTP extends StatelessWidget {
                   else
                     Navigator.pushNamed(context, "/join_room");
                 } else
-                  specs.showError(["Wrong OTP"]);
+                  specs.showAllErrors(["Wrong OTP"]);
               }).catchError((error) => log(error, name: 'enterOTP'));
             },
           ),

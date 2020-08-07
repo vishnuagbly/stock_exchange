@@ -5,6 +5,7 @@ import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:stockexchange/components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:stockexchange/components/dialogs/boolean_dialog.dart';
+import 'game_finished_page.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/menu_pages/menu_pages.dart';
 import 'package:stockexchange/menu_pages/processed_cards_page.dart';
@@ -28,9 +29,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       await Network.alertDocSubscription.cancel();
     await connection.cancel();
     if (alertDialogSubscription != null) await alertDialogSubscription.cancel();
-    playerManager = null;
-    cardBank = null;
     currentPage.value = StockPage.start;
+    if (!gameFinished) resetAllValues();
   }
 
   @override
@@ -59,11 +59,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             builder: (context) => BooleanDialog(
               'Do you want to continue saved game',
               onPressedYes: () {
-                startSavedGame(
-                  Phone.savedCardBank,
-                  Phone.players,
-                  Phone.allCompanies,
-                );
+                startSavedGame();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ifGameFinished();
+                });
                 Navigator.of(context).pop();
               },
             ),
@@ -89,6 +88,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       screenHeight = screen.size.width;
     }
     return Container(
+      key: homePageGlobalKey,
       decoration: BoxDecoration(
         color: Colors.black,
         image: DecorationImage(

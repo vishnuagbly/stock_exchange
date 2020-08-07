@@ -1,10 +1,10 @@
 import 'dart:developer';
+import 'package:stockexchange/network/offline_database.dart';
+
 import 'backend_files/card_data.dart' as shareCard;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
-import 'json_classes/json_classes.dart';
-import 'network/network.dart';
 import 'backend_files/company.dart';
 import 'backend_files/card_data.dart';
 import 'backend_files/player.dart';
@@ -86,17 +86,6 @@ String getPageTitle(StockPage page) {
 MediaQueryData screen;
 double screenHeight, screenWidth;
 
-///Streams
-final playerTurnStream = Network.firestore
-    .document("${Network.roomName}/$playersTurnsDocName")
-    .snapshots();
-
-final playerTurnSubscription = playerTurnStream.listen((playerTurnDocument) {
-  PlayerTurn playerTurn = PlayerTurn.fromMap(playerTurnDocument.data);
-  if (playerTurn.turn == playerManager.mainPlayerTurn) yourTurn = true;
-  yourTurn = false;
-});
-
 ///company data
 var companies = [
   Company("Reliance", 200000, 75),
@@ -124,40 +113,42 @@ Company pageCompany = companies[0];
 String buyPageInitialDropDownValue = companies[0].name;
 String sellPageInitialDropDownValue = companies[1].name;
 State homePageState;
+GlobalKey homePageGlobalKey = GlobalKey();
 bool fromCompanyPage = false;
-bool currentTurn = false;
 
 ///constant values
-final kRupeeChar = "\u20b9";
-final kConnectionPageName = "/connection_page";
-final kHomePageName = '/home_page';
-final kCompanyPageName = "/company_page";
-final kCreateOnlineRoomName = "/create_online_room";
-final kJoinRoomName = "/join_room";
-final kLoginPageName = "/login_page";
-final kEnterPlayersPageName = "/enter_players";
-final kRoomOptionsPageName = "/room_options";
-final kLoadingPageName = '/loading_page';
-
-final String roomDataDocumentName = "room_data";
-final String loadingStatusDocName = "loading_status";
-final String alertDocumentName = "alert";
-
-final String playerDataDocumentName = "players_data";
+const kRupeeChar = "\u20b9";
+const kConnectionPageName = "/connection_page";
+const kHomePageName = '/home_page';
+const kCompanyPageName = "/company_page";
+const kCreateOnlineRoomName = "/create_online_room";
+const kJoinRoomName = "/join_room";
+const kLoginPageName = "/login_page";
+const kEnterPlayersPageName = "/enter_players";
+const kRoomOptionsPageName = "/room_options";
+const kLoadingPageName = '/loading_page';
+const kGameFinishedPageName = '/game_finished';
+const String kRoomDataDocName = "room_data";
+const String kLoadingStatusDocName = "loading_status";
+const String kAlertDocName = "alert";
+const String kPlayerDataDocName = "players_data";
+const String kRoundsDocName = 'rounds';
+const Color kPrimaryColor = Color(0xFF121212);
+const Color kSecondaryColor = Color(0xFF252525);
 
 String get playerDataCollectionPath =>
-    "$roomDataDocumentName/$playerDataDocumentName";
+    "$kRoomDataDocName/$kPlayerDataDocName";
 
-final String companiesDataDocumentName = "companies_data";
+const String kCompaniesDataDocName = "companies_data";
 
-String get companiesDataDocumentPath => companiesDataDocumentName;
+String get companiesDataDocumentPath => kCompaniesDataDocName;
 
-final String playersFullDataDocumentName = "Players_full_data";
+const String playersFullDataDocName = "Players_full_data";
 
 String get playerFullDataCollectionPath =>
-    "$roomDataDocumentName/$playersFullDataDocumentName";
+    "$kRoomDataDocName/$playersFullDataDocName";
 
-final String playersTurnsDocName = "players_turn";
+const String playersTurnsDocName = "players_turn";
 
 ///Alert Dialog Constants
 const kAlertDialogBackgroundColorCode = 0xFF202020;
@@ -171,12 +162,42 @@ ValueNotifier<int> balance;
 ValueNotifier<int> mainPlayerCards = ValueNotifier(0);
 ValueNotifier<int> homeListChanged = ValueNotifier(0);
 ValueNotifier<int> playerDataChanged = ValueNotifier(0);
+var currentTurnChanged = ValueNotifier<int>(null);
 var currentPage = ValueNotifier(StockPage.start);
+var currentRoundChanged = ValueNotifier<int>(null);
+var mainPlayerTurnChanged = ValueNotifier<int>(null);
+
+void resetAllValues() {
+  balance = null;
+  mainPlayerCards.value = 0;
+  homeListChanged.value = 0;
+  playerDataChanged.value = 0;
+  currentTurnChanged.value = null;
+  currentPage.value = StockPage.start;
+  currentRoundChanged.value = null;
+  mainPlayerTurnChanged.value = null;
+  online = false;
+  yourTurn = false;
+  gameFinished = false;
+  roomCreator = false;
+  tempPlayerName = '';
+  playerManager = null;
+  cardBank = null;
+  companies = [
+    Company("Reliance", 200000, 75),
+    Company("Google", 200000, 120),
+    Company("StarBucks", 200000, 50),
+    Company("Tesla", 200000, 55),
+    Company("Tisco", 200000, 40),
+    Company("Apple", 200000, 100),
+  ];
+}
 
 ///variables
 bool online = false;
 bool yourTurn = false;
 bool roomCreator = false;
+bool gameFinished = false;
 String tempPlayerName = "";
 
 ///constant styles and decorations
@@ -190,7 +211,7 @@ final kBuyShareButtonTextStyle = TextStyle(
 );
 
 final kBuyShareButtonDecoration = BoxDecoration(
-  color: Color(0xFF303030),
+  color: kSecondaryColor,
   borderRadius: BorderRadius.all(Radius.circular(50.0)),
   boxShadow: [
     BoxShadow(
@@ -203,7 +224,7 @@ final kBuyShareButtonDecoration = BoxDecoration(
 
 final kSlateBackDecoration = BoxDecoration(
   borderRadius: BorderRadius.all(Radius.circular(10)),
-  color: Color(0xff121212),
+  color: kPrimaryColor,
 );
 
 BoxDecoration kSquareBackDecoration(MediaQueryData data) {
@@ -232,35 +253,42 @@ CardBank cardBank;
 PlayerManager playerManager;
 
 ///start game
-void startGame(int totalPlayers) {
+void startGame(int totalPlayers, int totalRounds) {
   cardBank = shareCard.CardBank(totalPlayers, companies);
-  playerManager = PlayerManager(totalPlayers, 0);
+  playerManager = PlayerManager(totalPlayers, 0, totalRounds);
   currentPage.value = StockPage.home;
   playerManager.generatePlayers([tempPlayerName]);
   cardBank.generateAllCards();
   mainPlayerCards.value = 0;
   playerManager.setAllPlayersValues(
       cardBank.getEachPlayerCards(), cardBank.getEachPlayerProcessedCards());
-  if(!online){
+  if (!online) {
     playerManager.otherPlayersTurn(true);
+    currentTurnChanged.value = playerManager.mainPlayerTurn;
   }
+  mainPlayerTurnChanged.value = playerManager.mainPlayerTurn;
 }
 
-void startSavedGame(
-  CardBank savedCardBank,
-  List<Player> players,
-  List<Company> allCompanies,
-) {
-  cardBank = savedCardBank;
+void startSavedGame() {
+  cardBank = Phone.savedCardBank;
+  List<Player> players = Phone.players;
   int turn;
   for (int i = 0; i < players.length; i++) {
     var player = players[i];
-    if(player.mainPlayer)
-      turn = i;
+    if (player.mainPlayer) turn = i;
   }
-  playerManager = PlayerManager(players.length, turn, allPlayers: players);
+  playerManager = PlayerManager(
+    players.length,
+    turn,
+    Phone.totalRounds,
+    allPlayers: players,
+    currentRound: Phone.currentRound,
+  );
   currentPage.value = StockPage.home;
-  companies = allCompanies;
+  companies = Phone.allCompanies;
+  mainPlayerTurnChanged.value = playerManager.mainPlayerTurn;
+  currentTurnChanged.value = playerManager.mainPlayerTurn;
+  currentRoundChanged.value = Phone.currentRound;
   playerManager.otherPlayersTurn(true);
 }
 
@@ -275,9 +303,11 @@ void startNextRound() {
   playerManager.setAllPlayersValues(
       cardBank.getEachPlayerCards(), cardBank.getEachPlayerProcessedCards());
   if (!online) {
+    playerManager.currentRound += 1;
     playerManager.incrementPlayerTurns();
     playerManager.otherPlayersTurn(true);
   }
+  mainPlayerTurnChanged.value = playerManager.mainPlayerTurn;
 }
 
 ///Chart data

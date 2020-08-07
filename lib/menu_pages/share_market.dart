@@ -28,7 +28,7 @@ class ShareMarket {
       ],
       onPressedButton: (specs) {
         if (specs.inputTextControllers[0].text.isEmpty) {
-          specs.showError(["Shares are important to tell"]);
+          specs.showAllErrors(["Shares are important to tell"]);
           return;
         }
         Company selectedCompany = getCompany(specs.dropDownValue);
@@ -37,11 +37,11 @@ class ShareMarket {
         Player mainPlayer = playerManager.mainPlayer();
         specs.checkAndTakeActionIfCompanyIsBankrupt(context);
         if (shares > selectedCompany.leftShares) {
-          specs.showError(["", "there not enough shares left"]);
+          specs.showAllErrors(["", "there not enough shares left"]);
           return;
         }
         if (shares <= 0){
-          specs.showError(["cannot buy zero shares", ""]);
+          specs.showAllErrors(["cannot buy zero shares", ""]);
           return;
         }
         if (online) {
@@ -107,7 +107,7 @@ class ShareMarket {
         Player mainPlayer = playerManager.mainPlayer();
         specs.checkAndTakeActionIfCompanyIsBankrupt(context);
         if(shares <= 0){
-          specs.showError(['cannor sell zeo shares', '']);
+          specs.showAllErrors(['cannor sell zeo shares', '']);
           return;
         }
         if (shares <= mainPlayer.shares[companies.indexOf(selectedCompany)]) {
@@ -196,9 +196,9 @@ class ShareMarket {
         specs.inputTextControllers[i].text = inputLimits[i].toString();
         if (i == 1 && !sell)
           specs
-              .showError(["", "You don't have more money to buy these shares"]);
+              .showAllErrors(["", "You don't have more money to buy these shares"]);
         else
-          specs.showError(["These are maximum shares", ""]);
+          specs.showAllErrors(["These are maximum shares", ""]);
       }
     }
   }

@@ -111,7 +111,7 @@ class _CompanyPageState extends State<CompanyPage> {
                                 borderRadius: BorderRadius.all(
                                   Radius.circular(20.0),
                                 ),
-                                color: Color(0xFF121212),
+                                color: kPrimaryColor,
                               ),
                               child: CompanyStats(widget.company),
                             ),
@@ -239,7 +239,7 @@ class _CompanyStatsState extends State<CompanyStats> {
   String pointGraphButtonString = "All Rounds";
   Company company;
   Stream<DocumentSnapshot> stream =
-      Network.getDocumentStream(companiesDataDocumentName);
+      Network.getDocumentStream(kCompaniesDataDocName);
   StreamSubscription<DocumentSnapshot> companiesSubscription;
 
   _CompanyStatsState(this.company) {

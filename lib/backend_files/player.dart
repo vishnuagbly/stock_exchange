@@ -426,6 +426,17 @@ class PlayerManager {
   String get mainPlayerName => _allPlayers[_mainPlayerIndex].name;
   int _totalPlayers;
   int _mainPlayerIndex;
+  int _totalRounds;
+  int _currentRound;
+
+  int get currentRound => _currentRound;
+
+  set currentRound(int value) {
+    _currentRound = value;
+    currentRoundChanged.value = _currentRound;
+  }
+
+  int get totalRounds => _totalRounds;
 
   int get mainPlayerIndex => _mainPlayerIndex;
 
@@ -446,17 +457,29 @@ class PlayerManager {
 
   bool lastTurn() => mainPlayerTurn == (totalPlayers - 1);
 
-  PlayerManager(this._totalPlayers, int turn, {List<Player> allPlayers})
+  PlayerManager(this._totalPlayers, int turn, int totalRounds,
+      {List<Player> allPlayers, int currentRound = 1})
       : this._mainPlayerIndex = turn,
-        _allPlayers = allPlayers ?? [] {
+        _allPlayers = allPlayers ?? [],
+        this._totalRounds = totalRounds {
+    this.currentRound = currentRound;
     if (allPlayers != null) {
       for (var player in allPlayers)
         if (player.mainPlayer) setValueNotifier(money: player.money);
     }
   }
 
-  void setAllPlayersData(List<Map<String, dynamic>> playersMap) {
+  void setAllPlayersData(
+    List<Map<String, dynamic>> playersMap,
+    int newTotalRounds,
+    int newCurrentRound,
+  ) {
+    assert(newTotalRounds != null &&
+        newCurrentRound != null &&
+        playersMap != null);
     String logName = "player/setAllPlayersData()";
+    _totalRounds = newTotalRounds;
+    currentRound = newCurrentRound;
     playersMap = playersMap.reversed.toList();
     _totalPlayers = playersMap.length;
     log("playersMap: ${playersMap.toString()}", name: logName);
@@ -470,11 +493,14 @@ class PlayerManager {
         log("player id: ${player.uuid}", name: logName);
         log("player name: ${player.name}", name: logName);
         mainPlayer.totalPlayers = _totalPlayers;
-        if (player.turn == null) mainPlayer.turn = i;
-        else mainPlayer.turn = player.turn;
+        if (player.turn == null)
+          mainPlayer.turn = i;
+        else
+          mainPlayer.turn = player.turn;
         _mainPlayerIndex = i;
         _allPlayers.add(mainPlayer);
-        if (player.turn != mainPlayer.turn) //if database does not have correct turn;
+        if (player.turn !=
+            mainPlayer.turn) //if database does not have correct turn;
           Network.updateMainPlayerAndRoomData();
       }
       log("$i: ${_allPlayers[i].toMap().toString()}", name: logName);
@@ -578,7 +604,7 @@ class PlayerManager {
   Future<void> tradeProcessOnline(TradeDetails tradeDetails) async {
     await checkOnlineTradeIfPossible(tradeDetails);
     await Network.createDocument(
-            "$alertDocumentName/${_allPlayers[tradeDetails.playerRequested].uuid}/${Network.authId}",
+            "$kAlertDocName/${_allPlayers[tradeDetails.playerRequested].uuid}/${Network.authId}",
             TradeAlert(tradeDetails).toMap())
         .catchError((err) => throw err);
   }
@@ -639,6 +665,7 @@ class PlayerManager {
   void incrementPlayerTurns() {
     for (int i = 0; i < _allPlayers.length; i++)
       _allPlayers[i].incrementPlayerTurn();
+    if (!online) currentTurnChanged.value = mainPlayerTurn;
   }
 
   Player mainPlayer() {
@@ -688,9 +715,10 @@ class PlayerManager {
   ///if both player and playerIndex is provided than player will be considered
   ///over playerIndex.
   ///If neither are provided than it returns null;
-  List<BarChartData> playerBarGraphAllSharesData({Player player, int playerIndex}) {
-    if(player == null && playerIndex == null) return null;
-    if(player == null) player = _allPlayers[playerIndex];
+  List<BarChartData> playerBarGraphAllSharesData(
+      {Player player, int playerIndex}) {
+    if (player == null && playerIndex == null) return null;
+    if (player == null) player = _allPlayers[playerIndex];
     List<BarChartData> result = [];
     for (int i = 0; i < player.shares.length; i++)
       result.add(BarChartData(companies[i].name, player.shares[i].toDouble()));
@@ -701,8 +729,16 @@ class PlayerManager {
     List<BarChartData> result = [];
     List<Player> players = [];
     players.length = totalPlayers;
-    for (Player player in _allPlayers) players[player.turn] = player;
-    for (Player player in players) result.add(player.totalAssets());
+
+    for (Player player in _allPlayers) {
+      if (players[player.turn] == null)
+        players[player.turn] = player;
+      else
+        players.add(player);
+    }
+    for (Player player in players) {
+      if (player != null) result.add(player.totalAssets());
+    }
     return result;
   }
 

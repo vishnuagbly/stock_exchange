@@ -31,7 +31,7 @@ class BuySharesButton extends StatelessWidget {
             currentPage.value = StockPage.sell;
             sellPageInitialDropDownValue = currentCompany.name;
           }
-          else if(currentTurn || !online){
+          else if(yourTurn || !online){
             currentPage.value = StockPage.buy;
             buyPageInitialDropDownValue = currentCompany.name;
           }

@@ -50,7 +50,7 @@ Future<void> addToAlerts(List<Map<String, dynamic>> allAlertMaps) async {
       WaitingForResponseAlert alert =
           WaitingForResponseAlert(Network.authId, playerManager.mainPlayerName);
       Network.createDocument(
-          "$alertDocumentName/${waitingAlerts.last.uuid}/${Network.authId}",
+          "$kAlertDocName/${waitingAlerts.last.uuid}/${Network.authId}",
           alert.toMap());
     }
     alertsController.add(waitingAlerts[i]);

@@ -23,12 +23,9 @@ class HomePageHelp extends StatelessWidget {
           color: Colors.amber,
           thickness: 2,
         ),
-        Text("Aim of this game is to earn money buy buying and selling shares"),
+        Text("Aim of this game is to earn money by buying and selling shares"),
         SizedBox(height: 5),
         Text("Person with maximum money in the end wins"),
-        SizedBox(height: 5),
-        Text(
-            "There are infinite rounds, so quit whenever you wish and to check winner goto total assets page"),
         SizedBox(height: 10),
         Text(
           "APP LAYOUT:-",
