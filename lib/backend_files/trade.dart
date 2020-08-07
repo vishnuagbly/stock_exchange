@@ -118,7 +118,9 @@ bool checkIfTradingOfCardsPossible({
   if (cardsProvider.getAllCardsLength() -
           cardsProvider.totalTradedCards[acceptorIndex] -
           cardsAcceptor.totalTradedCards[providerIndex] <
-      numOfCards) return false;
-  if (numOfCards < 0) return false;
+      numOfCards)
+    return false;
+  if (numOfCards < 0)
+    return false;
   return true;
 }

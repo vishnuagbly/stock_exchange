@@ -377,12 +377,14 @@ class Player {
   }
 
   ///Performs trade considering the other player as requesting trade.
+  ///if you are making second half trade set [second] true.
   ///
   ///Trade is only performed one sided.
-  void makeHalfTrade(TradeDetails tradeDetails, Player player) {
+  void makeHalfTrade(TradeDetails tradeDetails, Player player,
+      {bool second = false}) {
     log('making half trade', name: 'Player.halfTrade');
     log('checking if trade possible', name: 'Player.halfTrade');
-    tradeDetails.checkIfTradePossible(player, this);
+    if (!second) tradeDetails.checkIfTradePossible(player, this);
     log('trade possible', name: 'Player.halfTrade');
     _money += tradeDetails.moneyOffered - tradeDetails.moneyRequested;
     if (mainPlayer) balance.value = money;
@@ -595,6 +597,7 @@ class PlayerManager {
       _allPlayers[requestedPlayerIndex].makeHalfTrade(
         tradeDetails.detailsForRequestedPlayer,
         _allPlayers[requestingPlayerIndex],
+        second: true,
       );
       return true;
     }

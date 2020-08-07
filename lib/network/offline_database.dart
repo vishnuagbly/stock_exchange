@@ -66,6 +66,8 @@ class Phone {
   static Future<void> getRounds() async {
     var store = intMapStoreFactory.store(roundsStoreName);
     var map = cloneMap(await store.record(0).get(await db));
+    if(map == null)
+      return null;
     totalRounds = map['totalRounds'];
     currentRound = map['currentRound'];
   }

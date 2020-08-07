@@ -92,7 +92,8 @@ class Transaction {
       }
       try {
         requested.makeHalfTrade(
-            tradeDetails.detailsForRequestedPlayer, requester);
+            tradeDetails.detailsForRequestedPlayer, requester,
+            second: true);
       } catch (err) {
         log("2nd half trade error: $err", name: 'Transaction.madeTrade');
         throw err;
@@ -138,7 +139,6 @@ class Transaction {
         var roomData = RoomData.fromMap(roomDataSnapshot.data);
         await Status.send(LoadingStatus.calculationStarted);
 
-
         List<Player> allPlayers = Player.allFullPlayersFromMap(
             Network.getAllDataFromDocuments(documents));
         List<shareCard.Card> allCards = getAllCards(allPlayers);
@@ -157,7 +157,6 @@ class Transaction {
         }
         roomData.allPlayersTotalAssetsBarCharData = totalAssets;
         await Status.send(LoadingStatus.calculationCompleted);
-
 
         await transaction.update(Network.companiesDataDocRef, {
           'companies': Company.allCompaniesToMap(tempCompanies),
