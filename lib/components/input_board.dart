@@ -28,11 +28,12 @@ class InputBoardSpecs {
   String value; //do not use
   List<TextEditingControllerWorkaround> inputTextControllers = [];
   String dropDownValue;
-  final State<InputBoard> state;
+  final GlobalKey<_InputBoardState> key;
+//  final State<InputBoard> state;
   List<String> errorText = [];
   List<String> infoText = [];
 
-  InputBoardSpecs(this.state, this.dropDownValue);
+  InputBoardSpecs(this.key, this.dropDownValue);
 
   ///if [nullIfEmpty] is true than return null in case of any empty field,
   ///Otherwise it returns 0 in case of empty field.
@@ -150,7 +151,7 @@ class InputBoardSpecs {
     });
   }
   // ignore: invalid_use_of_protected_member
-  void setBoardState(Function fn) => state.setState(fn);
+  void setBoardState(Function fn) => key.currentState.setState(fn);
 }
 
 class InputBoard extends StatefulWidget {
@@ -196,13 +197,15 @@ class InputBoard extends StatefulWidget {
 
 class _InputBoardState extends State<InputBoard> {
   String dropDownValue;
+  final Key key;
+  final InputBoardSpecs _specs;
 
-//  List<TextEditingControllerWorkaround> inputTextController = [];
-  InputBoardSpecs _specs;
+  _InputBoardState._(this._specs, this.dropDownValue, this.key);
 
-  _InputBoardState(this.dropDownValue, errorText) {
-    _specs = InputBoardSpecs(this, dropDownValue);
-    if (errorText != null) _specs.errorText = errorText;
+  factory _InputBoardState(String dropDownValue, List<String> errorText) {
+    var key = GlobalKey<_InputBoardState>();
+    var specs = InputBoardSpecs(key, dropDownValue);
+    return _InputBoardState._(specs, dropDownValue, key);
   }
 
   @override
@@ -272,6 +275,7 @@ class _InputBoardState extends State<InputBoard> {
 
     if (widget.sliverListType) {
       return SliverList(
+        key: key,
         delegate: SliverChildListDelegate(
           [
             mainBoard,
