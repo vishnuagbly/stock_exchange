@@ -9,22 +9,22 @@ Next Round stock price is determined by adding values of cards of each player an
 This project used knowledge of:-
   - Flutter
   - Dart
+  - Advanced Slivers
   - Asynchronous Programming
-  - Clean Coding
+  - Multi Player Handling
+  - Transactions
+  - Sembast (Inernal Memory Handling)
   - Firebase Cloud Firestore
   - Firebase authentication
-  - Transactions
   - Cloud Firestore Functions
   - Cloud Firestore Rules
-  - Advanced Slivers
   - Bar Chart
   - Images
   - Pie Chart
   - Line Chart
-  - Multi Player Handling
   - Dialogs
-  - Sembast (Inernal Memory Handling)
   - Math Equations (Using Flutter Tex)
+  - Clean Coding
   
 # Screenshots
 
