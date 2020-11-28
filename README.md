@@ -26,6 +26,17 @@ This project used knowledge of:-
   - Math Equations (Using Flutter Tex)
   - Clean Coding
   
+# Features  
+  - Mutli Player game upto 6 players
+  - Auto Room Deletion (In Online Game)
+  - Trade between Online players
+  - Continue Game by re-entering room
+  - Computer(AI) vs Player Mode (Offline)
+  - Auto-save game (For Both Offline and Online)
+  - Continue saved game (For Offline)
+  - Trade even with Computer(AI) in offline game.
+  
+  
 # Screenshots
 
 <img src="screenshots/splash_screen.png" width="310">  <img src="screenshots/start_page.png" width="310"> <img src="screenshots/join_room.png" width="310">
