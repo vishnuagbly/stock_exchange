@@ -26,3 +26,9 @@ This project used knowledge of:-
   - Sembast (Inernal Memory Handling)
   - Math Equations (Using Flutter Tex)
   
+# Screenshots
+
+<img src="screenshots/splash_screen.png" width="310">  <img src="screenshots/start_page.png" width="310"> <img src="screenshots/join_room.png" width="310">
+<img src="screenshots/home_page.png" width="310">  <img src="screenshots/company_page.png" width="310"> <img src="screenshots/cards_page.png" width="310">
+<img src="screenshots/total_assets_page.png" width="310">  <img src="screenshots/home_page_scroll.png" width="310"> <img src="screenshots/cards_page_help.png" width="310">
+<img src="screenshots/total_shares_page.png" width="310">  <img src="screenshots/next_round_and_info_box.png" width="310"> <img src="screenshots/final_page.png" width="310">
