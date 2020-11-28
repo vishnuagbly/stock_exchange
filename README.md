@@ -1,16 +1,28 @@
-# stockexchange
+# Introduction
+This was a solo major project made solely by me.
 
-A new Flutter application.
+# Stock Exchange(Full Stack App in Flutter)
+This is the stock simulation game. In this game players trade stocks. And aim of the game is to earn highest amount of money.
+Each player gets 10 cards, which represent for companies whether stocks price will go up or down, in next round.
+Next Round stock price is determined by adding values of cards of each player and some reserved cards.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This project used knowledge of:-
+  - Flutter
+  - Dart
+  - Asynchronous Programming
+  - Clean Coding
+  - Firebase Cloud Firestore
+  - Firebase authentication
+  - Transactions
+  - Cloud Firestore Functions
+  - Cloud Firestore Rules
+  - Advanced Slivers
+  - Bar Chart
+  - Images
+  - Pie Chart
+  - Line Chart
+  - Multi Player Handling
+  - Dialogs
+  - Sembast (Inernal Memory Handling)
+  - Math Equations (Using Flutter Tex)
+  
