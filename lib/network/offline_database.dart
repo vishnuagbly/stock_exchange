@@ -13,6 +13,12 @@ class Phone {
   static const String cardsStoreName = 'cards';
   static const String companiesStoreName = 'companies';
   static const String roundsStoreName = 'rounds';
+  static const List<String> allStoresName = [
+    playerStoreName,
+    cardsStoreName,
+    companiesStoreName,
+    roundsStoreName,
+  ];
   static List<Player> players;
   static int totalRounds;
   static int currentRound;
@@ -29,6 +35,13 @@ class Phone {
       _db = await dbFactory.openDatabase(dbPath);
     }
     return _db;
+  }
+
+  static Future<void> deleteGame() async {
+    for(var storeName in allStoresName) {
+      var store = intMapStoreFactory.store(storeName);
+      store.delete(await db);
+    }
   }
 
   static Future<void> saveGame() async {

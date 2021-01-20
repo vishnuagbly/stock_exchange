@@ -13,11 +13,12 @@ import 'package:stockexchange/pages/game_finished_page.dart';
 class NextRoundPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    int depressionValue = 0;
     return SliverList(
       delegate: SliverChildListDelegate(
         [
           Container(
-            margin: EdgeInsets.all(50),
+            margin: EdgeInsets.fromLTRB(50, 50, 50, 0),
             padding: EdgeInsets.all(30),
             decoration: kSlateBackDecoration,
             child: Column(
@@ -72,6 +73,50 @@ class NextRoundPage extends StatelessWidget {
                       },
                     ),
                   ],
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: screenWidth * 0.05),
+          Container(
+            margin: EdgeInsets.fromLTRB(50, 0, 50, 50),
+            padding: EdgeInsets.all(30),
+            decoration: kSlateBackDecoration,
+            child: Column(
+              children: [
+                Text("Depression Bar", style: TextStyle(
+                  fontSize: screenWidth * 0.04,
+                ),),
+                SizedBox(
+                  height: screenWidth * 0.02,
+                ),
+                Container(
+                  width: double.infinity,
+                  height: screenWidth * 0.1,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: Color(0x10FFFFFF),
+                  ),
+                  padding: EdgeInsets.all(7),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(50),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: depressionValue,
+                          child: Container(
+                            height: double.infinity,
+                            color: Colors.red[700],
+                            child: Center(child: Text("$depressionValue%")),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 100 - depressionValue,
+                          child: Container(),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

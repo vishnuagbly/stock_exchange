@@ -278,6 +278,11 @@ class Player {
     mainPlayerCards.value++;
   }
 
+  void sellAllShares() {
+    for (int i = 0; i < companies.length; i++)
+      if (shares[i] > 0) sellShares(i, shares[i]);
+  }
+
   void autoPlay() {
     if (!mainPlayer || !online) {
       for (int i = 0; i < this.shares.length; i++)

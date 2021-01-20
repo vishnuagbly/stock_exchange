@@ -1,8 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stockexchange/global.dart';
 import 'package:stockexchange/network/network.dart';
+import 'package:stockexchange/network/offline_database.dart';
+import 'package:stockexchange/network/transactions.dart';
+
+import 'dialogs/future_dialog.dart';
 
 class PopUpMenu extends StatelessWidget {
   @override
@@ -36,6 +41,7 @@ class PopUpMenuAllItems extends StatelessWidget {
         ),
         CurrentTurn(),
         Round(),
+        Quit(),
         Divider(color: Colors.transparent),
       ],
     );
@@ -80,22 +86,22 @@ class Round extends StatelessWidget {
       valueListenable: currentRoundChanged,
       builder: (context, value, _) {
         return Column(
-        children: [
-          Divider(color: Colors.white70),
-          BooleanCounter(
-            title: 'Round',
-            firstCard: SmallCustomCard(
-              title: 'Current',
-              value: value,
+          children: [
+            Divider(color: Colors.white70),
+            BooleanCounter(
+              title: 'Round',
+              firstCard: SmallCustomCard(
+                title: 'Current',
+                value: value,
+              ),
+              secondCard: SmallCustomCard(
+                title: 'Total',
+                value: playerManager.totalRounds,
+                fontColor: Colors.blue,
+              ),
             ),
-            secondCard: SmallCustomCard(
-              title: 'Total',
-              value: playerManager.totalRounds,
-              fontColor: Colors.blue,
-            ),
-          ),
-        ],
-      );
+          ],
+        );
       },
     );
   }
@@ -190,4 +196,59 @@ class SmallCustomCard extends StatelessWidget {
       ],
     );
   }
+}
+
+class Quit extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Divider(color: Colors.white70),
+        RaisedButton(
+          onPressed: () async {
+            await showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) {
+                  return FutureDialog(
+                    future: quitGame(),
+                    loadingText: "Quiting Game...",
+                  );
+                });
+            Phoenix.rebirth(context);
+          },
+          color: kSecondaryColor,
+          padding: EdgeInsets.zero,
+          elevation: 10,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(screenWidth * 0.02),
+          ),
+          child: Container(
+            width: screenWidth * 0.3 + 23,
+            //15 + (4 + 4)(for margin around above cards)
+            height: screenWidth * 0.08,
+            child: Center(
+              child: Text(
+                "Quit",
+                style: GoogleFonts.montserrat(
+                  fontSize: screenWidth * 0.045,
+                  color: Colors.red[900],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+Future<void> quitGame() async {
+  if (!online) {
+    var mainPlayer = playerManager.mainPlayer();
+    mainPlayer.sellAllShares();
+    playerManager.setMainPlayerValues(mainPlayer);
+    await Phone.deleteGame();
+  } else
+    await Transaction.quitGame();
 }
