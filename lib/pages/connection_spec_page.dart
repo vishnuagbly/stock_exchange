@@ -124,7 +124,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
                 child: Center(
                   child: Text(
                     "Or",
-                    style: GoogleFonts.iMFellDWPica(
+                    style: GoogleFonts.imFellDwPica(
                       textStyle: TextStyle(
                         fontSize: 35,
                         fontStyle: FontStyle.italic,

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:developer' as dev;
+import '../global.dart';
 import 'company.dart';
 
 class Card {
@@ -226,8 +227,10 @@ class CardBank {
   }
 
   List<Company> updateCompanyPrices() {
+    final lastTotalAssets = playerManager.mainPlayer().totalAssets().measure;
     for (int i = 0; i < allCompanies.length; i++)
       allCompanies[i].setCurrentSharePrice(_processedCards[i].shareValueChange);
+    playerManager.setDepressionValue(lastTotalAssets);
     return allCompanies;
   }
 }

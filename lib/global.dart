@@ -8,6 +8,7 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'backend_files/company.dart';
 import 'backend_files/card_data.dart';
 import 'backend_files/player.dart';
+import 'network/transactions.dart';
 
 ///enumerations
 enum StockPage {
@@ -251,6 +252,17 @@ CardBank cardBank;
 
 ///Players
 PlayerManager playerManager;
+
+///Quit Game
+Future<void> quitGame() async {
+  if (!online) {
+    var mainPlayer = playerManager.mainPlayer();
+    mainPlayer.sellAllShares();
+    playerManager.setMainPlayerValues(mainPlayer);
+    await Phone.deleteGame();
+  } else
+    await Transaction.quitGame();
+}
 
 ///start game
 void startGame(int totalPlayers, int totalRounds) {

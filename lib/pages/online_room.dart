@@ -25,7 +25,7 @@ class OnlineRoom extends StatelessWidget {
               ),
               child: StreamBuilder<DocumentSnapshot>(
                 stream: Network.firestore
-                    .document("${Network.gameDataPath}/$kRoomDataDocName")
+                    .doc("${Network.gameDataPath}/$kRoomDataDocName")
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting)
@@ -33,10 +33,10 @@ class OnlineRoom extends StatelessWidget {
                   if (!snapshot.hasData) return RoomDoesNotExist();
                   log("snapshot contains data creating online room",
                       name: 'OnlineRoom');
-                  log("data: ${snapshot.data.documentID}", name: 'OnlineRoom');
+                  log("data: ${snapshot.data.id}", name: 'OnlineRoom');
                   DocumentSnapshot roomDataDocument = snapshot.data;
                   if (roomDataDocument.data == null) return RoomDoesNotExist();
-                  RoomData roomData = RoomData.fromMap(roomDataDocument.data);
+                  RoomData roomData = RoomData.fromMap(roomDataDocument.data());
                   List<Widget> result = [];
                   log("mainPlayer UUID: ${Network.authId}", name: 'OnlineRoom');
                   for (PlayerId player in roomData.playerIds) {

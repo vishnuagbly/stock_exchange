@@ -36,7 +36,7 @@ class TradeAccepted extends Alert {
         stream: Network.getDocumentStream(kLoadingStatusDocName),
         builder: (context, snapshot) {
           if (snapshot.data != null && snapshot.data.data != null) {
-            Status statusObj = Status.fromMap(snapshot.data.data);
+            Status statusObj = Status.fromMap(snapshot.data.data());
             if (statusObj.status == LoadingStatus.tradingError) {
               return CommonAlertDialog(
                 'Some error occured',

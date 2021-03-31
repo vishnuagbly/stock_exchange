@@ -66,7 +66,7 @@ class TotalAssetsPlayersOnline extends StatelessWidget {
     String logName = "TotalAssetsPlayerOnline";
     return StreamBuilder<DocumentSnapshot>(
       stream: Network.firestore
-          .document("${Network.gameDataPath}/$kRoomDataDocName")
+          .doc("${Network.gameDataPath}/$kRoomDataDocName")
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -78,7 +78,7 @@ class TotalAssetsPlayersOnline extends StatelessWidget {
         if (roomDataDocument.data == null) return Container();
         List<BarChartData> data = [];
         List<BarChartData> barChartData;
-        RoomData roomData = RoomData.fromMap(roomDataDocument.data);
+        RoomData roomData = RoomData.fromMap(roomDataDocument.data());
         log("room Data successfully created", name: logName);
         try {
           List<Player> allPlayers = playerManager.allPlayers;

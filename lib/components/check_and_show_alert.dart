@@ -14,10 +14,10 @@ StreamSubscription<QuerySnapshot> checkAndShowAlert() {
       Network.getCollectionStream("${Network.alertCollectionPath}");
   var alertSubscription = stream.listen((QuerySnapshot snapshot) async {
     log('listened something from alerts document', name: 'checkAndShowAlert');
-    List<DocumentSnapshot> allDocuments = snapshot.documents;
+    List<DocumentSnapshot> allDocuments = snapshot.docs;
     List<Map<String, dynamic>> allAlertMaps = [];
-    for (DocumentSnapshot document in allDocuments) {
-      allAlertMaps.add(document.data);
+    for (var document in allDocuments) {
+      allAlertMaps.add(document.data());
       log('adding alert: ${document.data}', name: 'checkAndShowAlert');
     }
     if (allAlertMaps.length > 0) {

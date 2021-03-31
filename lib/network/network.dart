@@ -13,7 +13,7 @@ import 'package:stockexchange/json_classes/json_classes.dart';
 import 'dart:math' as maths;
 
 class Network {
-  static final firestore = Firestore.instance;
+  static final firestore = FirebaseFirestore.instance;
   static final maths.Random rand = maths.Random();
   static final onlineMode = false;
   static String authId;
@@ -46,21 +46,21 @@ class Network {
   }
 
   static DocumentReference playerFullDataRef(String uuid) =>
-      firestore.document('$roomName/$playerFullDataCollectionPath/$uuid');
+      firestore.doc('$roomName/$playerFullDataCollectionPath/$uuid');
 
   static DocumentReference get mainPlayerDataDocRef => playerDataDocRef(authId);
 
   static DocumentReference playerDataDocRef(String uuid) =>
-      firestore.document('$roomName/$playerDataCollectionPath/$uuid');
+      firestore.doc('$roomName/$playerDataCollectionPath/$uuid');
 
   static DocumentReference get roomDataDocRef =>
-      firestore.document('$roomName/$kRoomDataDocName');
+      firestore.doc('$roomName/$kRoomDataDocName');
 
   static DocumentReference get companiesDataDocRef =>
-      firestore.document('$roomName/$companiesDataDocumentPath');
+      firestore.doc('$roomName/$companiesDataDocumentPath');
 
   static DocumentReference get roundsDocRef =>
-      firestore.document('$roomName/$kRoundsDocName');
+      firestore.doc('$roomName/$kRoundsDocName');
 
   static Future<bool> checkInternetConnection() async {
     try {
@@ -233,9 +233,9 @@ class Network {
     Stream<DocumentSnapshot> stream =
         getDocumentStream("$kCompaniesDataDocName");
     stream.listen((DocumentSnapshot snapshot) {
-      if (snapshot.data == null)
+      if (snapshot.data() == null)
         throw PlatformException(code: 'COMPANIES_DATA_NULL');
-      Map<String, dynamic> companiesDataMap = snapshot.data;
+      Map<String, dynamic> companiesDataMap = snapshot.data();
       homeListChanged.value++;
       log("downloaded companies data", name: "checkAndDownloadCompaniesData");
 //      for(Company company in companies)
@@ -254,8 +254,8 @@ class Network {
     stream.listen((QuerySnapshot snapshot) {
       log("downloaded players data", name: "checkAndDownloadPlayersData");
       List<Map<String, dynamic>> allPlayersData = [];
-      for (DocumentSnapshot documentSnapshot in snapshot.documents)
-        allPlayersData.add(documentSnapshot.data);
+      for (DocumentSnapshot documentSnapshot in snapshot.docs)
+        allPlayersData.add(documentSnapshot.data());
       playerManager.updateAllPlayersData(allPlayersData);
       log("updated players data", name: "checkAndDownloadPlayersData");
     });
@@ -263,11 +263,11 @@ class Network {
 
   static Future<void> checkAndUpdateCurrentTurn() async {
     final playerTurnStream = Network.firestore
-        .document("${Network.roomName}/$playersTurnsDocName")
+        .doc("${Network.roomName}/$playersTurnsDocName")
         .snapshots();
 
     playerTurnStream.listen((playerTurnDocument) {
-      PlayerTurn playerTurn = PlayerTurn.fromMap(playerTurnDocument.data);
+      PlayerTurn playerTurn = PlayerTurn.fromMap(playerTurnDocument.data());
       currentTurnChanged.value = playerTurn.turn;
       log('new current turn: ${playerTurn.turn}', name: 'updateCurrentTurn');
       log('main Player turn: ${playerManager.mainPlayerTurn}',
@@ -282,14 +282,14 @@ class Network {
   static Future<List<Map<String, dynamic>>> getAllDocuments(
       String collectionPath) async {
     QuerySnapshot querySnapshot =
-        await firestore.collection("$roomName/$collectionPath").getDocuments();
-    return getAllDataFromDocuments(querySnapshot.documents);
+        await firestore.collection("$roomName/$collectionPath").get();
+    return getAllDataFromDocuments(querySnapshot.docs);
   }
 
   static List<Map<String, dynamic>> getAllDataFromDocuments(
       List<DocumentSnapshot> documents) {
     List<Map<String, dynamic>> result = [];
-    for (DocumentSnapshot document in documents) result.add(document.data);
+    for (DocumentSnapshot document in documents) result.add(document.data());
     return result;
   }
 
@@ -299,19 +299,19 @@ class Network {
 
   static Future<Map<String, dynamic>> getData(String documentName) async {
     DocumentSnapshot document = await getDocument(documentName);
-    return document.data;
+    return document.data();
   }
 
   static Stream<DocumentSnapshot> getDocumentStream(String documentName) {
-    return firestore.document("$gameDataPath/$documentName").snapshots();
+    return firestore.doc("$gameDataPath/$documentName").snapshots();
   }
 
   static Future<DocumentSnapshot> getDocument(String documentName) async {
     DocumentSnapshot document;
     try {
-      document = await firestore.document("$gameDataPath/$documentName").get();
-      if (document.data != null) {
-        log('got doc $documentName: ${document.data.toString()}',
+      document = await firestore.doc("$gameDataPath/$documentName").get();
+      if (document.data() != null) {
+        log('got doc $documentName: ${document.data().toString()}',
             name: 'getDocument');
         setTimestamp();
       }
@@ -325,7 +325,7 @@ class Network {
   static Future<void> updateData(
       String documentName, Map<String, dynamic> data) async {
     try {
-      await firestore.document("$gameDataPath/$documentName").updateData(data);
+      await firestore.doc("$gameDataPath/$documentName").update(data);
       await setTimestamp();
     } catch (error) {
       log(error.toString(), name: 'updateData');
@@ -335,8 +335,10 @@ class Network {
   static void setData(String documentName, Map<String, dynamic> data) async {
     try {
       firestore
-          .document("$gameDataPath/$documentName")
-          .setData(data, merge: true);
+          .doc("$gameDataPath/$documentName")
+          .set(data, SetOptions(
+        merge: true,
+      ));
       setTimestamp();
     } catch (error) {
       log(error, name: 'setData');
@@ -358,7 +360,7 @@ class Network {
         name: "createDocument",
       );
       if (documentName != null)
-        await firestore.document("$gameDataPath/$documentName").setData(data);
+        await firestore.doc("$gameDataPath/$documentName").set(data);
       else
         await firestore.collection(gameDataPath).add(data);
       return Future.value(true);
@@ -373,7 +375,7 @@ class Network {
     if (printConsole)
       log("checking if document exists", name: 'documentExists');
     DocumentSnapshot snapshot =
-        await firestore.document("$gameDataPath/$documentPath").get();
+        await firestore.doc("$gameDataPath/$documentPath").get();
     if (snapshot == null || !snapshot.exists) {
       if (printConsole)
         log("$gameDataPath/$documentPath does not exists",
@@ -388,14 +390,14 @@ class Network {
   static deleteAllDocuments(String collectionPath) async {
     QuerySnapshot querySnapshot = await firestore
         .collection("$gameDataPath/$collectionPath")
-        .getDocuments();
-    for (DocumentSnapshot document in querySnapshot.documents)
-      await deleteDocument("$collectionPath/${document.documentID}");
+        .get();
+    for (DocumentSnapshot document in querySnapshot.docs)
+      await deleteDocument("$collectionPath/${document.id}");
   }
 
   static Future<void> deleteDocument(String documentPath) async {
     await firestore
-        .document("$gameDataPath/$documentPath")
+        .doc("$gameDataPath/$documentPath")
         .delete()
         .catchError((error) => log(error, name: 'deleteDocument'));
   }

@@ -9,7 +9,7 @@ import 'package:stockexchange/json_classes/json_classes.dart';
 import 'package:stockexchange/network/network.dart';
 
 class Transaction {
-  static final firestore = Firestore.instance;
+  static final firestore = FirebaseFirestore.instance;
 
   static Future<void> buySellShares(
       int companyIndex, int shares, bool sellShares) async {
@@ -21,14 +21,14 @@ class Transaction {
           var mainPlayerSnapshot =
               await transaction.get(Network.mainPlayerFullDataDocRef);
           companies =
-              Company.allCompaniesFromMap(companiesSnapshot.data['companies']);
-          mainPlayer = Player.fromFullMap(mainPlayerSnapshot.data);
+              Company.allCompaniesFromMap(companiesSnapshot.data()['companies']);
+          mainPlayer = Player.fromFullMap(mainPlayerSnapshot.data());
           if (sellShares)
             mainPlayer.sellShares(companyIndex, shares);
           else
             mainPlayer.buyShares(companyIndex, shares);
           var roomDataSnapshot = await transaction.get(Network.roomDataDocRef);
-          RoomData roomData = RoomData.fromMap(roomDataSnapshot.data);
+          RoomData roomData = RoomData.fromMap(roomDataSnapshot.data());
           var totalAssets = roomData.allPlayersTotalAssetsBarCharData;
           for (int i = 0; i < totalAssets.length; i++)
             if (totalAssets[i].domain == mainPlayer.name)
@@ -55,12 +55,12 @@ class Transaction {
           var mainPlayerSnapshot =
               await transaction.get(Network.mainPlayerFullDataDocRef);
           companies =
-              Company.allCompaniesFromMap(companiesSnapshot.data['companies']);
-          mainPlayer = Player.fromFullMap(mainPlayerSnapshot.data);
+              Company.allCompaniesFromMap(companiesSnapshot.data()['companies']);
+          mainPlayer = Player.fromFullMap(mainPlayerSnapshot.data());
           mainPlayer.sellAllShares();
           //TODO delete player from online database
           var roomDataSnapshot = await transaction.get(Network.roomDataDocRef);
-          RoomData roomData = RoomData.fromMap(roomDataSnapshot.data);
+          RoomData roomData = RoomData.fromMap(roomDataSnapshot.data());
           var totalAssets = roomData.allPlayersTotalAssetsBarCharData;
           for (int i = 0; i < totalAssets.length; i++)
             if (totalAssets[i].domain == mainPlayer.name)
@@ -91,23 +91,23 @@ class Transaction {
       var requestedSnapshot =
           await transaction.get(Network.playerFullDataRef(requestedId));
       var roomDataSnapshot = await transaction.get(Network.roomDataDocRef);
-      RoomData roomData = RoomData.fromMap(roomDataSnapshot.data);
-      if (requesterSnapshot.data == null) {
+      RoomData roomData = RoomData.fromMap(roomDataSnapshot.data());
+      if (requesterSnapshot.data() == null) {
         throw PlatformException(
           code: 'PLAYER_NOT_FOUND',
           message: 'some error occured',
           details: 'requester: $requesterId not found',
         );
       }
-      if (requestedSnapshot.data == null) {
+      if (requestedSnapshot.data() == null) {
         throw PlatformException(
           code: 'PLAYER_NOT_FOUND',
           message: 'some error occured',
           details: 'requested: $requestedId not found',
         );
       }
-      Player requester = Player.fromFullMap(requesterSnapshot.data);
-      Player requested = Player.fromFullMap(requestedSnapshot.data);
+      Player requester = Player.fromFullMap(requesterSnapshot.data());
+      Player requested = Player.fromFullMap(requestedSnapshot.data());
       if (requester.uuid == Network.authId)
         mainPlayer = requester;
       else
@@ -168,7 +168,7 @@ class Transaction {
         List<DocumentSnapshot> documents = [];
         for (var ref in playerRefs) documents.add(await transaction.get(ref));
         var roomDataSnapshot = await transaction.get(Network.roomDataDocRef);
-        var roomData = RoomData.fromMap(roomDataSnapshot.data);
+        var roomData = RoomData.fromMap(roomDataSnapshot.data());
         await Status.send(LoadingStatus.calculationStarted);
 
         List<Player> allPlayers = Player.allFullPlayersFromMap(
@@ -195,7 +195,7 @@ class Transaction {
         });
         await Status.send(LoadingStatus.startingNextRound);
         await transaction.set(
-            firestore.document('${Network.roomName}/$playersTurnsDocName'), {
+            firestore.doc('${Network.roomName}/$playersTurnsDocName'), {
           'turns': 0,
         });
         await transaction.update(Network.roomDataDocRef, roomData.toMap());

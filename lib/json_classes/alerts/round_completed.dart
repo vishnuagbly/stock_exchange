@@ -39,7 +39,7 @@ class CompletingRound extends Alert {
             builder: (context, snapshot) {
               String status = "Completing Round";
               if (snapshot.data != null && snapshot.data.data != null) {
-                Map<String, dynamic> statusMap = snapshot.data.data;
+                Map<String, dynamic> statusMap = snapshot.data.data();
                 Status statusObj = Status.fromMap(statusMap);
                 if (statusObj.status == LoadingStatus.startedNextRound) {
                   startNextRound();

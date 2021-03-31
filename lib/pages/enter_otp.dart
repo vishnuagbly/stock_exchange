@@ -30,7 +30,7 @@ class EnterOTP extends StatelessWidget {
             onPressedButton: (specs) {
               log("verification id: $_verificationId", name: 'enterOTP');
               log("entered value: ${specs.inputTextControllers[0].text}", name: 'enterOTP');
-              AuthCredential authCredential = PhoneAuthProvider.getCredential(
+              AuthCredential authCredential = PhoneAuthProvider.credential(
                 verificationId: _verificationId,
                 smsCode: specs.inputTextControllers[0].text,
               );

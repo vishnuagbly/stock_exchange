@@ -242,13 +242,3 @@ class Quit extends StatelessWidget {
     );
   }
 }
-
-Future<void> quitGame() async {
-  if (!online) {
-    var mainPlayer = playerManager.mainPlayer();
-    mainPlayer.sellAllShares();
-    playerManager.setMainPlayerValues(mainPlayer);
-    await Phone.deleteGame();
-  } else
-    await Transaction.quitGame();
-}

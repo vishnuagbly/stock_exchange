@@ -170,7 +170,7 @@ class LoginPage extends StatelessWidget {
     }).catchError((error) => log(error.toString(), name: 'loginPage->autoRetrieval'));
   }
 
-  void _verificationFailed(context, AuthException authException) {
+  void _verificationFailed(context, FirebaseAuthException authException) {
     log("ERROR message: ${authException.message}", name: 'loginPage->verificationFailed');
     log("ERROR CODE: ${authException.code}", name: 'loginPage->verificationFailed');
     controller.add(PlatformException(code: 'verification_failed'));

@@ -435,8 +435,11 @@ class PlayerManager {
   int _mainPlayerIndex;
   int _totalRounds;
   int _currentRound;
+  int _depressionValue = 0;
 
   int get currentRound => _currentRound;
+
+  int get depressionValue => _depressionValue;
 
   set currentRound(int value) {
     _currentRound = value;
@@ -446,6 +449,8 @@ class PlayerManager {
   int get totalRounds => _totalRounds;
 
   int get mainPlayerIndex => _mainPlayerIndex;
+
+  Player get _mainPlayer => _allPlayers[mainPlayerIndex];
 
   int get totalPlayers => _totalPlayers;
 
@@ -558,6 +563,14 @@ class PlayerManager {
   void setAllPlayersValues(List<List<shareCard.Card>> playerCards,
       List<List<shareCard.Card>> processedPlayerCards) {
     _allPlayers.setNewCards(playerCards, processedPlayerCards);
+  }
+
+  void setDepressionValue(double lastTotalAssets) {
+    final currentTotalAssets = _mainPlayer.totalAssets().measure;
+    final totalAssetsDiff = lastTotalAssets - currentTotalAssets;
+    _depressionValue += ((totalAssetsDiff / lastTotalAssets) * 100).toInt();
+    if (_depressionValue > 100) _depressionValue = 100;
+    if (_depressionValue < 0) _depressionValue = 0;
   }
 
   ///returns -1 in case of name doesn't exist.

@@ -350,10 +350,10 @@ class _CompanyStatsState extends State<CompanyStats> {
     return StreamBuilder<QuerySnapshot>(
       stream: Network.getCollectionStream(playerDataCollectionPath),
       builder: (context, snapshot) {
-        if (snapshot.data != null && snapshot.data.documents.length > 0) {
+        if (snapshot.data != null && snapshot.data.docs.length > 0) {
           List<Map<String, dynamic>> players = [];
-          for (DocumentSnapshot document in snapshot.data.documents)
-            players.add(document.data);
+          for (DocumentSnapshot document in snapshot.data.docs)
+            players.add(document.data());
           playerManager.updateAllPlayersData(players);
         }
         return Row(
@@ -394,7 +394,7 @@ class _CompanyStatsState extends State<CompanyStats> {
       log("companies values changed", name: widgetName);
       if (snapshot.data != null) {
         List<Company> allCompanies =
-            Company.allCompaniesFromMap(snapshot.data["companies"]);
+            Company.allCompaniesFromMap(snapshot.data()["companies"]);
         Company newCompanyValue;
         for (Company comp in allCompanies) {
           if (comp.name == company.name) newCompanyValue = comp;
